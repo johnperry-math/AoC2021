@@ -8,9 +8,7 @@
 --     without passing through a small chamber more than once
 --
 --  part 2: repeat, but allowed to pass through ONE small chamber twice;
---     this takes nearly a minute,
---     and could be sped up by introducing a type that ,
---     which however I am loath to do at the moment
+--     this takes nearly a minute, despite an attempt at optimization
 
 pragma Ada_2020;
 
@@ -79,15 +77,23 @@ procedure Day12 is
       (Left (1) < Right (1) or else
        (Left (1) = Right (1) and then Left (2) < Right (2)));
 
+   use type Ada.Containers.Count_Type;
+
    function "<" (Left, Right : Vertex_Vectors.Vector) return Boolean is
+   --  ordered by length, with ties broken by lexicographic
+
       Result : Boolean := False;
-      use type Ada.Containers.Count_Type;
+
    begin
+
       if Left.Length < Right.Length then
          Result := True;
+
       elsif Left.Length > Right.Length then
          Result := False;
+
       else
+
          for I in 1 .. Positive (Left.Length) loop
             if Left (I) > Right (I) then
                exit;
@@ -96,11 +102,12 @@ procedure Day12 is
                exit;
             end if;
          end loop;
-      end if;
-      return Result;
-   end "<";
 
-   use type Ada.Containers.Count_Type;
+      end if;
+
+      return Result;
+
+   end "<";
 
    function "=" (Left, Right : Vertex_Vectors.Vector) return Boolean is
       (Left.Length = Right.Length and then
@@ -117,23 +124,34 @@ procedure Day12 is
    Unexpected_Vertex : exception;
 
    function Get_Vertex (S : String; Start, Stop : Positive) return Vertex is
+   --  gets the vertex whose label is S (Start .. Stop),
+   --  with the caveat that if it's too long, you'll get "start" or "end"
+   --     (as appropriate),
+   --  and if it's too short, it will be back-padded by a space
          ((
           if Stop - Start > 1 then
+
              (if S (Start .. Stop) = "start" then
                     Start_Vertex
+
               elsif S (Start .. Stop) = "end" then
                     End_Vertex
+
               else
                  raise Unexpected_Vertex with S (Start .. Stop)
+
              )
+
           elsif Stop = Start then
              Vertex '(S (Start), ' ')
+
           else
              Vertex (S (Start .. Stop))
+
          ));
 
    procedure Read_Input is
-   --
+   --  reads in the graph
 
       Input_File  : Text_IO.File_Type;
       Filename    : constant String := (if Doing_Example then "example3.txt"
@@ -201,28 +219,43 @@ procedure Day12 is
    --  PARTS 1 AND 2
 
    function Is_Large (V : Vertex) return Boolean is
+   --  True iff all the characters are upper case or space
       (V (1) in 'A' .. 'Z' and then (V (2) in 'A' .. 'Z' or else V (2) = ' '));
 
-   function Has_Repeated_Small (Path : Vertex_Vectors.Vector) return Boolean
-   is
+   function Has_Repeated_Small (Path : Vertex_Vectors.Vector) return Boolean is
+   --  True iff Path has a repeated lower-case vertex
+
    begin
+
       for I in Path.First_Index .. Path.Last_Index loop
+
          if not Is_Large (Path (I)) then
+
             for J in I + 1 .. Path.Last_Index loop
                if Path (J) = Path (I) then
                   return True;
                end if;
             end loop;
+
          end if;
+
       end loop;
+
       return False;
+
    end Has_Repeated_Small;
 
    function Number_Of_Paths (Part : Part_Number := First) return Natural is
+   --  returns the number of paths from start to end,
+   --  subject to the requirements of each part
+
       Result : Natural := 0;
-      To_Do  : Vertex_Vector_Queues.Queue;
-      Done   : Vertex_Vector_Sets.Set;
+
+      Done   : Vertex_Vector_Sets.Set;     --  bfs-related
+      To_Do  : Vertex_Vector_Queues.Queue; --  bfs-related
+
    begin
+
       --  start from, well, start!
       declare
          New_Path : Vertex_Vectors.Vector;
@@ -230,19 +263,22 @@ procedure Day12 is
          New_Path.Append (Start_Vertex);
          To_Do.Push (New_Path);
       end;
-      --  bfs
+
+      --  perform bfs
       while not To_Do.Is_Empty loop
+
          declare
-            Path : Vertex_Vectors.Vector;
+            Path : Vertex_Vectors.Vector; --  old path
          begin
+
             To_Do.Pop (Path);
-            --  Text_IO.Put_Line ("popped " & Path'Image); Text_IO.New_Line;
+
+            -- loop through its connections to extend
             for V of Connections (Path.Last_Element) loop
-               --  Text_IO.Put_Line ("   connected to " & V'Image);
+
                if V = End_Vertex then
-                  --  Text_IO.Put_Line ("      " & Path'Image
-                  --                    & " " & End_Vertex'Image);
                   Result := Result + 1;
+
                elsif Is_Large (V) or else
                   (Part = First and then not Path.Contains (V)) or else
                   (Part = Second and then
@@ -250,28 +286,30 @@ procedure Day12 is
                         (not Path.Contains (V) or else
                                  not Has_Repeated_Small (Path)))
                then
+
                   declare
                      New_Path : Vertex_Vectors.Vector
                         := Vertex_Vectors.Copy (Path);
                   begin
+
                      New_Path.Append (V);
                      if not Done.Contains (New_Path) then
-                        --  Text_IO.Put_Line ("      adding to path...");
                         Done.Include (New_Path);
                         To_Do.Push (New_Path);
-                        --  Text_IO.Put_Line ("      ...added");
                      end if;
+
                   end;
-               --  elsif not Is_Large(V) and then Part = Second then
-               --     Text_IO.Put_Line ("      rejected because"
-               --                       & Boolean'Image(V /= Start_Vertex)
-               --                       & Has_Repeated_Small (Path)'image
-               --                      );
+
                end if;
+
             end loop;
+
          end;
+
       end loop;
+
       return Result;
+
    end Number_Of_Paths;
 
 begin
