@@ -215,3 +215,29 @@ Look at how the octopus are growing in energy; they flash at 9, so
 
 #### Experience
 Not particularly challenging, not particularly tedious.
+
+### Day 12: Passage Pathing
+
+Searching for all the paths through a chambered cavern.
+There are two types of chambers: small (lower-case) and large (upper-case).
+
+1. Determine the number of paths that have _no_ repetition of small chambers.
+1. Determine the number of paths that have _at most one_ repetition
+   of _one_ small chamber which is neither `start` nor `end`.
+
+#### Tools
+* Ada's `Vector`, `Hashed_Maps`, `Hashed_Sets`, and `Ordered_Maps`.
+* Breadth-first search for paths, which means...
+* My `Queue` type.
+
+####
+Getting the program to work with the examples got it to work with the input,
+but it was a challenge to get it to work with the examples!
+Getting set up for Part 1 was already tedious, and
+while Part 2 should have been relatively quick after that,
+I kept getting the logic wrong.
+Worse, it's slow: part 2 takes about 45 seconds!
+A first attempt at optimizing did not work;
+I now suspect it's the use of `Ordered_Maps`,
+but I'm done with the problem for now.
+It's a nice problem! I just have to sleep at some point...
