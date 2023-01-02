@@ -1,0 +1,17 @@
+name = "day12"
+description = "Shiny new project"
+version = "0.0.0"
+
+authors = ["John Perry"]
+maintainers = ["John Perry <devotus@yahoo.com>"]
+maintainers-logins = ["johnperry-math"]
+
+executables = ["day12"]
+
+[[depends-on]]
+aoc2021 = "*"
+components = "*"
+
+[[pins]]
+aoc2021 = { path = "../aoc2021" }
+components = { path = "../../components" }
