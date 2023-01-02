@@ -230,7 +230,7 @@ There are two types of chambers: small (lower-case) and large (upper-case).
 * Breadth-first search for paths, which means...
 * My `Queue` type.
 
-####
+#### Experience
 Getting the program to work with the examples got it to work with the input,
 but it was a challenge to get it to work with the examples!
 Getting set up for Part 1 was already tedious, and
