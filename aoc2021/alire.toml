@@ -1,0 +1,7 @@
+name = "aoc2021"
+description = "Shiny new project"
+version = "0.0.0"
+
+authors = ["John Perry"]
+maintainers = ["John Perry <devotus@yahoo.com>"]
+maintainers-logins = ["johnperry-math"]
