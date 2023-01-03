@@ -21,6 +21,8 @@ procedure Day11 is
 
    Doing_Example : constant Boolean := False;
 
+   Make_Imagery : constant Boolean := False;
+
    --  SECTION
    --  global types and variables
 
@@ -70,6 +72,55 @@ procedure Day11 is
       Text_IO.Close (Input_File);
 
    end Read_Input;
+
+   Iteration : Natural := 0;
+
+   procedure Write_Energy_As_Ppm is
+      Output_File  : Text_IO.File_Type;
+      Suffix       : array (1 .. 4) of Character := (others => '0');
+   begin
+      declare Tmp_Suffix : constant String := Iteration'Image;
+      begin
+         if Iteration < 10 then
+            Suffix (4) := Tmp_Suffix (2);
+         elsif Iteration < 100 then
+            Suffix (3) := Tmp_Suffix (2);
+            Suffix (4) := Tmp_Suffix (3);
+         else
+            for I in 2 .. 4 loop
+               Suffix (I) := Tmp_Suffix (I);
+            end loop;
+         end if;
+      end;
+
+      Text_IO.Create (Output_File,
+                      Name =>
+                         "energy_" & String (Suffix) & ".ppm"
+                     );
+      Text_IO.Put (Output_File, "P3");
+      Text_IO.Put (Output_File,
+                   Natural'Image (Col_Range'Last - Col_Range'First + 1));
+      Text_IO.Put (Output_File,
+                   Natural'Image (Row_Range'Last - Row_Range'First + 1));
+      Text_IO.Put (Output_File, " 255"); -- max color
+      Text_IO.New_Line (Output_File);
+
+      for Row in Row_Range loop
+         for Col in Col_Range loop
+            declare
+               Blue_Value : constant Natural := Energy_Levels (Row, Col) * 25;
+               Red_Value  : constant Natural := Energy_Levels (Row, Col) * 12;
+            begin
+               Text_IO.Put_Line
+                  (Output_File, Red_Value'Image & " 0" & Blue_Value'Image);
+            end;
+         end loop;
+         Text_IO.New_Line (Output_File);
+      end loop;
+
+      Text_IO.Close (Output_File);
+
+   end Write_Energy_As_Ppm;
 
    --  SECTION
    --  PARTS 1 AND 2
@@ -199,6 +250,10 @@ procedure Day11 is
       Raise_Energy;
       Apply_Flash_Spillover;
       Result := Flashes;
+      Iteration := Iteration + 1;
+      if Make_Imagery then
+         Write_Energy_As_Ppm;
+      end if;
       Clear_Flashes;
 
       return Result;
@@ -229,6 +284,10 @@ procedure Day11 is
 begin
 
    Read_Input;
+
+   if Make_Imagery then
+      Write_Energy_As_Ppm;
+   end if;
 
    --  PART 1
    Text_IO.Put_Line ("there were" & Count_All_Flashes'Image

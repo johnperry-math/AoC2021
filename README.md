@@ -216,6 +216,11 @@ Look at how the octopus are growing in energy; they flash at 9, so
 #### Experience
 Not particularly challenging, not particularly tedious.
 
+#### Visualization
+This lends itself to visualization quite well.
+
+[<img src="day11/full_thing.gif" width="240">](day11/full_thing.gif)
+
 ### Day 12: Passage Pathing
 
 Searching for all the paths through a chambered cavern.
