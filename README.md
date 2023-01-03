@@ -241,3 +241,23 @@ A first attempt at optimizing did not work;
 I now suspect it's the use of `Ordered_Maps`,
 but I'm done with the problem for now.
 It's a nice problem! I just have to sleep at some point...
+
+### Day 13: Transparent origami
+
+You need to figure out the code to initialize a device
+by performing a number of folds on a sheet of paper
+that has seemingly random dots.
+Once you do that, the initialization code should be 8 capital letters.
+
+1. Perform only the first fold and report the number of dots.
+   Do not double-count dots that overlap.
+1. Perform the remaining folds and report the letters that appear.
+
+#### Tools
+* Ada's `Vectors` and `Hashed_Sets` types
+* the `Get_Integer` function I wrote for Advent of Code 2022
+* Mathematics! in particular, some elementary geometry of transformations
+
+#### Experience
+Fun and easy. I had to do a little debugging because I forgot in part 2
+to switch away from performing the folds on `Dots` to `New_Dots`.
