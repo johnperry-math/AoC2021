@@ -266,3 +266,31 @@ Once you do that, the initialization code should be 8 capital letters.
 #### Experience
 Fun and easy. I had to do a little debugging because I forgot in part 2
 to switch away from performing the folds on `Dots` to `New_Dots`.
+
+### Day 14: Extended Polymerization
+
+You need to manufacture more polymer to reinforce the submarine's hull.
+You are given a polymer template and rules for inserting an element
+between each pair of elements.
+We score the polymer by computing the difference
+between the highest and lowest frequencies of elements.
+
+1. Determine the score after 10 turns. This is a reasonable number.
+1. Determine the score after 40 turns. This is an unreasonable number,
+   and you won't be able to compute it directly.
+
+#### Tools
+* Ada's `Vector` and `Hashed_Map` types.
+* For part 2, the `Hashed_Map` comes in quite handy.
+  Instead of trying to compute the polymer directly:
+  * count the number of pairs in the initial polymer;
+  * then, on each turn, use that count to count the number of new pairs.
+
+#### Experience
+Mostly fun. Not quite so easy. It took me a few minutes to figure out
+how to re-imagine the problem away from computing the vector directly.
+Then it took me a while to debug the code.
+
+Ada's rules on tampering with cursors are so strict that they flagged my code
+even though _I was doing nothing dangerous._
+Rather irritating.
