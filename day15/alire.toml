@@ -1,0 +1,18 @@
+name = "day15"
+description = "day 15 of 2021 advent of code"
+version = "0.1.0-dev"
+
+authors = ["John Perry"]
+maintainers = ["John Perry <devotus@yahoo.com>"]
+maintainers-logins = ["johnperry-math"]
+licenses = "GPL-3.0-or-later"
+website = ""
+tags = ["advent-of-code", "ada"]
+
+executables = ["day15"]
+
+[[depends-on]]
+components = "*"
+
+[[pins]]
+components = { path = "../../components" }

@@ -294,3 +294,35 @@ Then it took me a while to debug the code.
 Ada's rules on tampering with cursors are so strict that they flagged my code
 even though _I was doing nothing dangerous._
 Rather irritating.
+
+### Day 15: Chiton
+
+You are still trying to find your way out of the cavern,
+and the only way out appears to be through a maze of chiton.
+Each cell of the 100x100 maze (10x10 for the example) has an associated risk.
+You want to find the path of least risk.
+
+1. Find the path of least risk and report its risk factor.
+1. Turns out the maze given is only a template of the actual maze!
+   The actual maze is a 5x5 tiling of the original, where
+   position (i,j) of tile (k,j) has the value _v_ + (_k_ - 1) + (_j_ - 1),
+   where _v_ is the value of position (i,j) of the original --
+   with the catch that if the new value is larger than 9,
+   reduce it repeatedly by 9 until it is.
+   (Not quite verbatim to the problem, but equivalent.)
+
+#### Tools
+* Ada's `Vector`, `Hashed_Map`, and `Unbounded_Priority_Queue` type, which
+  implies the `Synchronized_Queue_Interfaces` type.
+* Since my custom `Queue` type doesn't work for priorities,
+  and it is quite likely that paths are not always added by increasing risk,
+  I decided not to use that.
+
+#### Experience.
+Fun! Not easy, but thanks to AoC
+I'm now well accustomed to breadth-first search,
+including cases like this where you have to check the reward of a new option
+against the reward of a previously queued one.
+
+Alas, my implementation is somewhat slow:
+on my laptop, it takes roughly 2m15sec to solve both parts.
