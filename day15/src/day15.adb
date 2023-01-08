@@ -123,10 +123,50 @@ procedure Day15 is
    end Put_Maze;
    pragma Warnings (On, "procedure ""Put_Maze"" is not referenced");
 
+   procedure Write_To_Ppm (Maze : Maze_Type; Path : Path_Vectors.Vector) is
+      Output_File : Text_IO.File_Type;
+      Width       : constant Positive := Maze'Last (2) - Maze'First (2) + 1;
+      Height      : constant Positive := Maze'Last (1) - Maze'First (1) + 1;
+   begin
+
+      Text_IO.Create (Output_File, Name => "solution.ppm");
+      Text_IO.Put (Output_File, "P3");
+      Text_IO.Put (Output_File, Width'Image);
+      Text_IO.Put (Output_File, Height'Image);
+      Text_IO.Put (Output_File, " 255"); -- max color
+      Text_IO.New_Line (Output_File);
+
+      for Row in Maze'Range (1) loop
+         for Col in Maze'Range (2) loop
+            declare
+               --  so 224 will be brightest possible,
+               --  and 92 will be darkest possible
+               Gray_Level : constant Natural
+                  := 224 - (Maze (Row, Col) * 128 / 9);
+            begin
+               if Path.Contains ((Row, Col)) then
+                  Text_IO.Put_Line
+                     (Output_File,
+                      Gray_Level'Image & " 0 255");
+               else
+                  Text_IO.Put_Line
+                     (Output_File,
+                      " 255" & Gray_Level'Image & Gray_Level'Image);
+               end if;
+            end;
+         end loop;
+      end loop;
+
+      Text_IO.Close (Output_File);
+
+   end Write_To_Ppm;
+
    --  SECTION
    --  PARTS 1 AND 2
 
-   function Lowest_Risk (Maze : Maze_Type) return Positive is
+   function Lowest_Risk (Maze : Maze_Type; Visualize : Boolean := False)
+                         return Positive
+   is
    --  uses a breadth-first search to find the least risky path through Maze
 
       --  first we define some functions and packages specific to this one
@@ -228,6 +268,9 @@ procedure Day15 is
                   Risk := Path_Risk (Next);
 
                   if Next.Last_Element = ((Maze'Last (1), Maze'Last (2))) then
+                     if Visualize then
+                        Write_To_Ppm (Maze, Next);
+                     end if;
                      return Risk;
                   end if;
 
@@ -296,6 +339,6 @@ begin
 
    Create_Second_Maze;
    Text_IO.Put_Line ("the lowest cost to traverse the larger maze is"
-                     & Lowest_Risk (Maze_Part_2)'Image);
+                     & Lowest_Risk (Maze_Part_2, True)'Image);
 
 end Day15;

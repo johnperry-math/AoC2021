@@ -326,3 +326,15 @@ against the reward of a previously queued one.
 
 Alas, my implementation is somewhat slow:
 on my laptop, it takes roughly 2m15sec to solve both parts.
+
+#### Visualization
+If the solution is difficult to make out, zoom! The image holds up well.
+(Unless your browser interpolates zoomed images. Firefox is one of those.
+In that case, open it in a different browser or a separate program.)
+
+[<img src="day15/solution.png" width="500">](day15/solution.png)
+
+* A lowest-cost path is in _blue_.
+* The more _red_ a cell has, the more chiton it has.
+  I chose red because it's the color of the chiton shown on
+  [the Wikipedia page](https://en.wikipedia.org/wiki/Chiton).
