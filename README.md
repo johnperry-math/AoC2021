@@ -338,3 +338,24 @@ In that case, open it in a different browser or a separate program.)
 * The more _red_ a cell has, the more chiton it has.
   I chose red because it's the color of the chiton shown on
   [the Wikipedia page](https://en.wikipedia.org/wiki/Chiton).
+
+## Day 16: Packet Decoder
+
+Given a fairly long packet, decode its contents.
+The packet contains sub-packets.
+Each packet header has a version and a type; what follows depends on the type.
+
+1. Compute the sum of all packet versions.
+1. The packet encodes a sequence of operations to perform.
+   Determine the result.
+
+### Tools
+* Ada's `Vector` and `Long_Long_Integer` types (the values grow too large)
+* Recursive descent parsing
+* Converting hex to binary and binary to "ordinary"
+
+#### Experience
+Fun. Should have been easy.
+I misinterpreted a run-time error message that an operation overflowed
+to conclude (wrongly) that I was parsing things wrong:
+I thought I had an out-of-bounds index error. **sigh**

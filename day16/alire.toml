@@ -1,0 +1,12 @@
+name = "day16"
+description = "day 16, advent of code 2021"
+version = "0.1.0-dev"
+
+authors = ["John Perry"]
+maintainers = ["John Perry <devotus@yahoo.com>"]
+maintainers-logins = ["johnperry-math"]
+licenses = "GPL-3.0-or-later"
+website = ""
+tags = ["advent-of-code", "ada"]
+
+executables = ["day16"]
