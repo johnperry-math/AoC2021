@@ -1,5 +1,7 @@
 # Advent of Code 2021 in Ada
 
+[<img src="ada_logo.svg" width="200">](ada_logo.svg)
+
 Because 3 years of pain and suffering aren't enough. :grin:
 I did at least use Alire first, as well as a custom-made `Queue`.
 
