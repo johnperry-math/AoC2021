@@ -371,11 +371,13 @@ The probe is subject to drag in the x direction, and to gravity in the y.
    that gets the probe into the target area.
 1. Determine how many trajectories get the probe into the target area.
 
-### Tools
+#### Tools
 * Triangular numbers (again!)
 
-### Experience
+#### Experience
 This should have been fun and easy, but I misread Part 1 completely,
 and ended up entering the correct dy trajectory instead of the correct height.
 It was only after looking at someone else's solution,
 and seeing what a large number it was, that I worked out this one.
+
+FWIW, I wish Parts 1 and 2 had been reversed.
