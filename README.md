@@ -341,7 +341,7 @@ In that case, open it in a different browser or a separate program.)
   I chose red because it's the color of the chiton shown on
   [the Wikipedia page](https://en.wikipedia.org/wiki/Chiton).
 
-## Day 16: Packet Decoder
+### Day 16: Packet Decoder
 
 Given a fairly long packet, decode its contents.
 The packet contains sub-packets.
@@ -351,7 +351,7 @@ Each packet header has a version and a type; what follows depends on the type.
 1. The packet encodes a sequence of operations to perform.
    Determine the result.
 
-### Tools
+#### Tools
 * Ada's `Vector` and `Long_Long_Integer` types (the values grow too large)
 * Recursive descent parsing
 * Converting hex to binary and binary to "ordinary"
@@ -361,3 +361,21 @@ Fun. Should have been easy.
 I misinterpreted a run-time error message that an operation overflowed
 to conclude (wrongly) that I was parsing things wrong:
 I thought I had an out-of-bounds index error. **sigh**
+
+### Day 17: Trick Shot
+
+You need to shoot a probe through a target region.
+The probe is subject to drag in the x direction, and to gravity in the y.
+
+1. Determine the largest possible vertical height
+   that gets the probe into the target area.
+1. Determine how many trajectories get the probe into the target area.
+
+### Tools
+* Triangular numbers (again!)
+
+### Experience
+This should have been fun and easy, but I misread Part 1 completely,
+and ended up entering the correct dy trajectory instead of the correct height.
+It was only after looking at someone else's solution,
+and seeing what a large number it was, that I worked out this one.
