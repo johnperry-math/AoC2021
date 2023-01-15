@@ -381,3 +381,50 @@ It was only after looking at someone else's solution,
 and seeing what a large number it was, that I worked out this one.
 
 FWIW, I wish Parts 1 and 2 had been reversed.
+
+### Day 18: Snailfish
+
+Some snailfish tell you they've seen the key and they'll help you find it
+just so long as you help a yung'un with 'is homework.
+
+Kind of silly, but the problem is interesting.
+Snailfish numbers are written as recursive pairs, like so: (taken from puzzle)
+* [[1,9],[8,5]]
+* [[[[1,2],[3,4]],[[5,6],[7,8]]],9]
+
+We only learn about sums, which consist of concatenation into a new pair,
+the repeatedly
+* "exploding" pairs that are too deep by adding their left (resp. right) entry
+  to the closest numerical entries on the left (resp. right), then
+* "splitting" any numerical entry with a value larger than 9
+  into a pair that consists of its integral halves
+  (rounding, if needed, left down and right up).
+
+Numbers are then evaluated by magnitude, which is:
+* for a numerical entry, the entry itself;
+* for a pair, the sum of thrice the magnitude of the left
+  and twice that of the right.
+
+1. Find the magnitude of the sum of all the numbers.
+1. Find the largest magnitude of the sum of any _two_ numbers.
+
+#### Tools
+* Ada's `Indefinite_Vectors` and `Indefinite_Multiway_Trees` types
+* Recursion
+
+#### Experience
+Fun, but not easy, and somewhat tedious.
+* It took a lot of effort merely to write the code to read the numbers in!
+* I had difficulty devising a solution to the problem.
+  It took me far too long to realize that trees were the right approach.
+* I don't have much experience with Ada's `Multiway_Trees`,
+  so I first concluded (wrongly) that it would not work for what I needed,
+  and wasted too long trying to write my own data structure.
+  It was only when I was about done writing that data structure that I thought,
+  "these `Access` types will be a pain to debug," and
+  went back to re-read the documentation on `Multiway_Trees`.
+  That's when I realized it was quite doable.
+
+Amazingly, once I wrote the code and got the reading of input debugged,
+both parts worked on the first try!
+Apparently the time I spent thinking about it was worth the delay.
