@@ -1,12 +1,12 @@
---  Advent of Code 2021
+-- Advent of Code 2021
 --
---  John Perry
+-- John Perry
 --
---  Day 18: Snailfish
+-- Day 18: Snailfish
 --
---  part 1: find the magnitude of the sum of all the snailfish numbers
+-- part 1: find the magnitude of the sum of all the snailfish numbers
 --
---  part 2: find the largest magnitude of any pair of snailfish numbers
+-- part 2: find the largest magnitude of any pair of snailfish numbers
 
 pragma Ada_2020;
 
@@ -23,11 +23,11 @@ procedure Day18 is
 
    Doing_Example : constant Boolean := False;
 
-   --  SECTION
-   --  global types and variables
+   -- SECTION
+   -- global types and variables
 
-   --  SUBSECTION
-   --  the snailfish numbers
+   -- SUBSECTION
+   -- the snailfish numbers
 
    type Number_Kind is (Pair, Immediate);
 
@@ -38,8 +38,8 @@ procedure Day18 is
       end case;
    end record;
 
-   --  SUBSECTION
-   --  snailfish number containers
+   -- SUBSECTION
+   -- snailfish number containers
 
    package Snail_Num_Trees is new Ada.Containers.Indefinite_Multiway_Trees
       (Element_Type => Snail_Num
@@ -55,19 +55,19 @@ procedure Day18 is
 
    All_Trees : Snail_Num_Vectors.Vector;
 
-   --  SUBSECTION
-   --  snailfish number output
+   -- SUBSECTION
+   -- snailfish number output
 
    pragma Warnings
       (Off, "procedure ""Put_Snail_Num"" is not referenced");
-   --  useful for debugging
+   -- useful for debugging
 
    procedure Put_Snail_Num
       (T : Snail_Num_Trees.Tree; C : Snail_Num_Trees.Cursor)
    is
-   --  prints a snailfish number to standard output
-   --  in the same format as shown in the puzzle
-   --  recursive, naturally
+   -- prints a snailfish number to standard output
+   -- in the same format as shown in the puzzle
+   -- recursive, naturally
 
       E : constant Snail_Num := Snail_Num_Trees.Element (C);
 
@@ -90,46 +90,46 @@ procedure Day18 is
    pragma Warnings
       (On, "procedure ""Put_Snail_Num"" is not referenced");
 
-   --  SUBSECTION
-   --  snailfish number reduction
+   -- SUBSECTION
+   -- snailfish number reduction
 
-   --  SUBSUBSECTION
-   --  explosions
+   -- SUBSUBSECTION
+   -- explosions
 
    procedure Propagate_Left
       (T : in out Snail_Num_Trees.Tree;
        N : Snail_Num_Trees.Cursor;
        V : Natural)
    is
-   --  use for the left sides of an explosion;
-   --  this propagates V up through T until
-   --  the parent's right child, rather than the left, is the previous node,
-   --  then moves to the left node,
-   --  then down through right nodes as far as it can
+   -- use for the left sides of an explosion;
+   -- this propagates V up through T until
+   -- the parent's right child, rather than the left, is the previous node,
+   -- then moves to the left node,
+   -- then down through right nodes as far as it can
 
       P : Snail_Num_Trees.Cursor := N;
       C : Snail_Num_Trees.Cursor := Snail_Num_Trees.Parent (N);
 
    begin
 
-      --  move up until we can move left
+      -- move up until we can move left
       while C /= T.Root and then P = Snail_Num_Trees.First_Child (C) loop
          P := C;
          C := Snail_Num_Trees.Parent (C);
       end loop;
 
-      --  if we're at root, then this number does not propagate
+      -- if we're at root, then this number does not propagate
       if C /= T.Root then
 
-         --  move left once
+         -- move left once
          C := Snail_Num_Trees.First_Child (C);
 
-         --  now move right
+         -- now move right
          while Snail_Num_Trees.Element (C).Kind = Pair loop
             C := Snail_Num_Trees.Last_Child (C);
          end loop;
 
-         --  add the value
+         -- add the value
          Snail_Num_Trees.Reference (T, C).Value := @ + V;
 
       end if;
@@ -141,35 +141,35 @@ procedure Day18 is
        N : Snail_Num_Trees.Cursor;
        V : Natural)
    is
-   --  use for the right sides of an explosion;
-   --  this propagates V up through T until
-   --  the parent's left child, rather than the right, is the previous node,
-   --  then moves to the right node,
-   --  then down through left nodes as far as it can
+   -- use for the right sides of an explosion;
+   -- this propagates V up through T until
+   -- the parent's left child, rather than the right, is the previous node,
+   -- then moves to the right node,
+   -- then down through left nodes as far as it can
 
       P : Snail_Num_Trees.Cursor := N;
       C : Snail_Num_Trees.Cursor := Snail_Num_Trees.Parent (N);
 
    begin
 
-      --  move up until we can move right
+      -- move up until we can move right
       while C /= T.Root and then P = Snail_Num_Trees.Last_Child (C) loop
          P := C;
          C := Snail_Num_Trees.Parent (C);
       end loop;
 
-      --  if we're at root, then this number does not propagate
+      -- if we're at root, then this number does not propagate
       if C /= T.Root then
 
-         --  move right once
+         -- move right once
          C := Snail_Num_Trees.Last_Child (C);
 
-         --  now move left
+         -- now move left
          while Snail_Num_Trees.Element (C).Kind = Pair loop
             C := Snail_Num_Trees.First_Child (C);
          end loop;
 
-         --  add the value
+         -- add the value
          Snail_Num_Trees.Reference (T, C).Value := @ + V;
 
       end if;
@@ -181,66 +181,66 @@ procedure Day18 is
        N : in out Snail_Num_Trees.Cursor
       )
    is
-   --  takes the left and right values of the pair number at N,
-   --  adds them to the first immediate number on the corresponding side,
-   --  then replaces N by the immediate number of 0
+   -- takes the left and right values of the pair number at N,
+   -- adds them to the first immediate number on the corresponding side,
+   -- then replaces N by the immediate number of 0
    --
-   --  notice the assumption that N is a pair number
-   --  whose entries are immediate numbers;
-   --  we do not check this, and the procedure will fail if you are not careful
+   -- notice the assumption that N is a pair number
+   -- whose entries are immediate numbers;
+   -- we do not check this, and the procedure will fail if you are not careful
    --
-   --  this uses Propagate_Left and Propagate_Right to add left and right
+   -- this uses Propagate_Left and Propagate_Right to add left and right
 
       C : Snail_Num_Trees.Cursor;
 
    begin
 
-      --  add left immediate to first immediate at left, if any
+      -- add left immediate to first immediate at left, if any
       Propagate_Left
          (T, N, Snail_Num_Trees.First_Child_Element (N).Value);
 
-      --  add right immediate to first immediate at right, if any
+      -- add right immediate to first immediate at right, if any
       Propagate_Right
          (T, N, Snail_Num_Trees.Last_Child_Element (N).Value);
 
-      --  delete the children
+      -- delete the children
       C := Snail_Num_Trees.First_Child (N);
       Snail_Num_Trees.Delete_Leaf (T, C);
       C := Snail_Num_Trees.Last_Child (N);
       Snail_Num_Trees.Delete_Leaf (T, C);
 
-      --  replace the pair element by an immediate element
+      -- replace the pair element by an immediate element
       T.Replace_Element
          (N, (Kind => Immediate, Value => 0));
 
    end Explode;
 
-   --  SUBSUBSECTION
-   --  splits
+   -- SUBSUBSECTION
+   -- splits
 
    procedure Split
       (T : in out Snail_Num_Trees.Tree; N : in out Snail_Num_Trees.Cursor)
    is
-   --  replaces the immediate number at N by a pair number
-   --  with the immediate number value of half of N on the left, rounded down,
-   --  and the immediate value of half of N on the right, rounded up if need be
+   -- replaces the immediate number at N by a pair number
+   -- with the immediate number value of half of N on the left, rounded down,
+   -- and the immediate value of half of N on the right, rounded up if need be
    --
-   --  notice the assumption that N is an immediate number;
-   --  we do not check this, and the procedure will fail if you are not careful
+   -- notice the assumption that N is an immediate number;
+   -- we do not check this, and the procedure will fail if you are not careful
 
-      --  the immediate number at N
+      -- the immediate number at N
       P : constant Snail_Num := Snail_Num_Trees.Element (N);
 
-      --  new entries for immediate numbers
+      -- new entries for immediate numbers
       New_Left_Value  : constant Natural := P.Value / 2;
       New_Right_Value : constant Natural
          := (if P.Value mod 2 = 0
              then P.Value / 2
              else P.Value / 2 + 1);
 
-      --  new immediate numbers
+      -- new immediate numbers
       New_Left  : constant Snail_Num := (Kind  => Immediate,
-                                                Value => New_Left_Value);
+                                         Value => New_Left_Value);
       New_Right : constant Snail_Num := (Kind  => Immediate,
                                          Value => New_Right_Value);
 
@@ -252,13 +252,13 @@ procedure Day18 is
 
    end Split;
 
-   --  SUBSUBSECTION
-   --  reductions
+   -- SUBSUBSECTION
+   -- reductions
 
    function First_Explosion (T : Snail_Num_Trees.Tree)
-                             return Snail_Num_Trees.Cursor
+                            return Snail_Num_Trees.Cursor
    is
-   --  returns the first explosion found in T
+   -- returns the first explosion found in T
    begin
 
       for C in T.Iterate loop
@@ -276,9 +276,9 @@ procedure Day18 is
    end First_Explosion;
 
    function First_Split (T : Snail_Num_Trees.Tree)
-                         return Snail_Num_Trees.Cursor
+                        return Snail_Num_Trees.Cursor
    is
-   --  returns the first split found in T
+   -- returns the first split found in T
    begin
 
       for C in T.Iterate loop
@@ -297,10 +297,10 @@ procedure Day18 is
 
    procedure Reduce (T : in out Snail_Num_Trees.Tree)
    is
-   --  reduces T according to the directions given in the puzzle:
-   --  reduce all explosions, and once there are no explosions left,
-   --  reduce all splits,
-   --  checking immediately for explosions after each split
+   -- reduces T according to the directions given in the puzzle:
+   -- reduce all explosions, and once there are no explosions left,
+   -- reduce all splits,
+   -- checking immediately for explosions after each split
 
       Changed : Boolean := True;
       C       : Snail_Num_Trees.Cursor;
@@ -309,18 +309,18 @@ procedure Day18 is
 
       while Changed loop
 
-         --  innocent until proven guilty
+         -- innocent until proven guilty
          Changed := False;
 
          C := First_Explosion (T);
 
          if C /= Snail_Num_Trees.No_Element then
-            --  always reduce explosions
+            -- always reduce explosions
             Changed := True;
             Explode (T, C);
 
          else
-            --  reduce splits only if there are no explosiosn
+            -- reduce splits only if there are no explosiosn
             C := First_Split (T);
             if C /= Snail_Num_Trees.No_Element then
                Changed := True;
@@ -334,9 +334,9 @@ procedure Day18 is
    end Reduce;
 
    function "+" (Left, Right : Snail_Num_Trees.Tree)
-                 return Snail_Num_Trees.Tree
+                return Snail_Num_Trees.Tree
    is
-   --  returns the reduced sum of Left and Right
+   -- returns the reduced sum of Left and Right
 
       Result     : Snail_Num_Trees.Tree;
       C          : Snail_Num_Trees.Cursor;
@@ -344,11 +344,11 @@ procedure Day18 is
 
    begin
 
-      --  Ada doesn't allow the root element to hold data
+      -- Ada doesn't allow the root element to hold data
       Result.Prepend_Child (Result.Root, New_Number);
       C := Snail_Num_Trees.First_Child (Result.Root);
 
-      --  at least it allows us to copy the trees! :-D
+      -- at least it allows us to copy the trees! :-D
       Result.Copy_Subtree (C,
                            Snail_Num_Trees.No_Element,
                            Snail_Num_Trees.First_Child (Left.Root)
@@ -364,18 +364,18 @@ procedure Day18 is
 
    end "+";
 
-   --  SECTION
-   --  I/O
+   -- SECTION
+   -- I/O
 
    procedure Get_Integer (S      : String;
                           Result : out Integer;
                           Pos    : in out Positive)
    is
-   --  Ada.Text_IO.Integer_IO has issues with "(\d)*:",
-   --  so I have to roll my own;
-   --  Pos needs indicate where to start reading in S,
-   --  and after termination it indicates the first non-digit value
-   --  (possibly out of bounds)
+   -- Ada.Text_IO.Integer_IO has issues with "(\d)*:",
+   -- so I have to roll my own;
+   -- Pos needs indicate where to start reading in S,
+   -- and after termination it indicates the first non-digit value
+   -- (possibly out of bounds)
 
       Is_Negative : constant Boolean := S (Pos) = '-';
 
@@ -404,8 +404,8 @@ procedure Day18 is
        T   : in out Snail_Num_Trees.Tree;
        C   : Snail_Num_Trees.Cursor)
    is
-   --  expects Snail_Num_Trees.Element (C) to be a pair waiting for values
-   --  and Pos to be first position _after_ the opening bracket for this pair
+   -- expects Snail_Num_Trees.Element(C) to be a pair waiting for values
+   -- and Pos to be first position _after_ the opening bracket for this pair
    begin
 
       if S (Pos) = '[' then
@@ -432,7 +432,7 @@ procedure Day18 is
    end Read_Snail_Num_Number;
 
    procedure Read_Input is
-   --  reads the input string and extract the target region dimensions
+   -- reads the input string and extract the target region dimensions
 
       Input_File  : Text_IO.File_Type;
       Filename    : constant String := (if Doing_Example then "example.txt"
@@ -465,16 +465,16 @@ procedure Day18 is
 
    end Read_Input;
 
-   --  SECTION
-   --  PARTS 1 AND 2
+   -- SECTION
+   -- PARTS 1 AND 2
 
    function Magnitude (T : Snail_Num_Trees.Tree; C : Snail_Num_Trees.Cursor)
                        return Natural
    is
-   --  per puzzle:
-   --  when a pair, the sum of thrice the first's magnitude
-   --  and twice the second's;
-   --  when immediate, simply the value
+   -- per puzzle:
+   -- when a pair, the sum of thrice the first's magnitude
+   -- and twice the second's;
+   -- when immediate, simply the value
 
       (case Snail_Num_Trees.Element (C).Kind is
 
@@ -482,14 +482,14 @@ procedure Day18 is
 
           when Pair      =>
              3 * Magnitude (T, Snail_Num_Trees.First_Child (C)) +
-             2 * Magnitude (T, Snail_Num_Trees.Last_Child (C))
+          2 * Magnitude (T, Snail_Num_Trees.Last_Child (C))
       );
 
 begin
 
    Read_Input;
 
-   --  part 1
+   -- part 1
    declare
       Sum : Snail_Num_Trees.Tree := Snail_Num_Trees.Copy
          (All_Trees.Constant_Reference (All_Trees.First));
@@ -507,12 +507,12 @@ begin
 
    end;
 
-   --  part 2
-   --  I thought briefly about finding a clever way to do this,
-   --  but there are only 100 numbers,
-   --  which means only Choose(100,2) = 50*99 = 4950 pairs,
-   --  which is... not a lot!
-   --  so brute force it is
+   -- part 2
+   -- I thought briefly about finding a clever way to do this,
+   -- but there are only 100 numbers,
+   -- which means only Choose(100,2) = 50*99 = 4950 pairs,
+   -- which is... not a lot!
+   -- so brute force it is
    declare
       Largest_Magnitude : Natural := 0;
    begin

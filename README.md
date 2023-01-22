@@ -428,3 +428,31 @@ Fun, but not easy, and somewhat tedious.
 Amazingly, once I wrote the code and got the reading of input debugged,
 both parts worked on the first try!
 Apparently the time I spent thinking about it was worth the delay.
+
+### Day 19: Beacon Scanner
+
+The submarine has spewed beacons and scanners all over the place,
+and in order to map the area you need to determine how the scanners
+are oriented to each other.
+
+1. Orient the scanners and report how many beacons there are.
+1. Report the largest distance between any two scanners.
+
+#### Tools
+* rotation matrices (optional)
+* Ada's `Vector` and `Hashed_Set` types.
+* a lot of patience
+
+#### Experience
+This was neither fun nor easy.
+The problem's wording misled me to mis-implement an optimization,
+so that I failed to match up some scanners in the example.
+I'm actually _quite relieved_ at that,
+because once the code worked on the example, it worked for the puzzle input.
+
+From what I read, quite a lot of other participants also found this puzzle
+unusually difficult, with some saying it was by far the hardest of 2021.
+I sure hope so! It took me about 12 hours,
+and if I hadn't used smoeone else's solution to print out corresponding points,
+it would have taken me much longer to realize
+that I was missing some rotations.
