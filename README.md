@@ -456,3 +456,74 @@ I sure hope so! It took me about 12 hours,
 and if I hadn't used smoeone else's solution to print out corresponding points,
 it would have taken me much longer to realize
 that I was missing some rotations.
+
+#### Discussion of potential optimizations
+The program takes 4-5 seconds on my machine.
+I've read that there are faster solutions,
+but they seem to use a different algorithm.
+A few things I've tried, with the results:
+* **suppressing computations that have already occurred**
+
+  `Correlate` performs on each axis every rotation that is a multiple of 90°.
+  This naïve approach creates 64 transformations, but only 24 are distinct.
+  To prevent this, I introduced the variables `Ref_Pos`, `Tried_Positions`,
+  and `Ref_Pos_Vec`, explained slightly out of order:
+  * The first is the `Position` `(1,2,3)`, which is placed into the third.
+  * The third is a `Scanner_Data` which we can feed to the `Reorient` function,
+    which re-orients it according to the current scheme.
+  * The second is a set that keeps track of which transformations of `(1,2,3)`
+    have already been considered.
+    When this happens, we avoid re-orienting the remaining positions.
+
+  This was a **very successful** optimization, bringing the execution time
+  down _dramatically_.
+* **rotation functions vs. rotation matrices**
+
+  Instead of calling one of various functions to compute the rotations,
+  and track, as above, the rotations we've already performed,
+  build in the 24 rotation matrices
+  and apply them via matrix-vector multiplication.
+  This is implemented in `Correlate_By_Matrix`, `Reorient_By_Marix`,
+  and associated types and variables.
+
+  This was a **useless** optimization.
+  The difference between rotation matrices and rotation functions
+  is negligible.
+* **tracking positions by hashed sets instead of vectors**
+
+  This was **basically useless.**
+  The current code still has a mix of sets and vectors, but at one point it was
+  set-only, and I reverted it for clarity's sake.
+  Perhaps the hash function is bad, but I suspect the real problem
+  is that the program doesn't have to track and search enough positions
+  for sets to make a difference.
+* **compile- and link-time optimization**
+
+  Basically, turning on every optimization
+  in the `Build->Switches->Ada` section of GPS'
+  `Project Preferences...` menu item.
+  This includes loop unrolling, link-time optimization, and
+  suppression of run-time checks.
+
+  This was a **very successful** optimization
+  with a dramatic reduction in execution time from ~20 seconds to ~5.
+* **adjusting one axis' facing, then rotating the other axes 90°**
+
+  This is inspired from the puzzle's own wording:
+
+  > In total, each scanner could be in any of 24 different orientations:
+  > facing positive or negative x, y, or z,
+  > and considering any of four directions "up" from that facing.
+
+  My implementation of this comment was **erroneous**:
+  using the example `(1,2,3)` above, it thrice re-oriented to `(-1,-2,-3)`,
+  while never re-oriented to `(-1,3,2)`.
+  Unfortunately, it's also how I read the puzzle's wording, so that
+  while I started to write code that would rotate around each axis 4 times,
+  obtaining 64 possible, non-distinct positions for each scanner,
+  I ended up writing code that computed
+  only 16 non-distinct positions for each scanner.
+  **This was the hardest part to debug,**
+  because I had so badly misunderstood that remark.
+  Re-reading it now, I may see how to implement it directly,
+  but if I ever do try, it won't be tonight!
