@@ -8,8 +8,6 @@
 --
 -- part 2: find the largest distance between two scanners
 
-pragma Ada_2020;
-
 with Ada.Text_IO;
 with Ada.Containers.Vectors;
 with Ada.Containers.Hashed_Sets;
@@ -325,11 +323,10 @@ procedure Day19 is
       Dz : constant Integer := Q.Z - P.Z;
       Number_Matching : Natural := 0;
    begin
-      for R of Second.Beacons_Absolute loop
-         if First.Beacons_Absolute.Contains ((R.X - Dx, R.Y - Dy, R.Z - Dz))
-         then
-            Number_Matching := Number_Matching + 1;
-         end if;
+      for R of Second.Beacons_Absolute
+      when First.Beacons_Absolute.Contains ((R.X - Dx, R.Y - Dy, R.Z - Dz))
+      loop
+         Number_Matching := Number_Matching + 1;
       end loop;
       return Number_Matching;
    end Matches_After_Translation;
@@ -478,19 +475,15 @@ procedure Day19 is
       Just_Done.Include (0);
       -- keep going until they're all done
       while To_Do.Length > 0 loop
-         for I of Just_Done loop
+         for I of Just_Done when not To_Do.Contains (I) loop
             -- correlate with the ones just done any we can that are undone
-            if not To_Do.Contains (I) then
-               --  Text_IO.Put_Line ("looking for correlations to" & I'Image);
-               for J of To_Do loop
-                  --  Text_IO.Put_Line ("   trying" & J'Image);
-                  if Correlate (Scanners (I), Scanners (J)) then
-                     Newly_Done.Include (J);
-                     --  Text_IO.Put_Line ("      yes");
-                  end if;
-               end loop;
-               To_Do := To_Do.Difference (Newly_Done);
-            end if;
+            --  Text_IO.Put_Line ("looking for correlations to" & I'Image);
+            for J of To_Do when Correlate (Scanners (I), Scanners (J)) loop
+               --  Text_IO.Put_Line ("   trying" & J'Image);
+               Newly_Done.Include (J);
+               --  Text_IO.Put_Line ("      yes");
+            end loop;
+            To_Do := To_Do.Difference (Newly_Done);
          end loop;
          Just_Done := Scanner_Sets.Copy (Newly_Done);
          Newly_Done.Clear;
@@ -509,7 +502,7 @@ procedure Day19 is
    -- returns the maximum distance between any two scanners
       Result : Natural := 0;
    begin
-      for I in Scanners.First_Index .. Scanners.Last_Index + 1 loop
+      for I in Scanners.First_Index .. Scanners.Last_Index - 1 loop
          for J in I + 1 .. Scanners.Last_Index loop
             declare
                I_Rel_Loc renames Scanners (I).Relative_To_Zero;

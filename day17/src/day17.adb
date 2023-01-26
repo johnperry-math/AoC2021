@@ -197,11 +197,10 @@ begin
 
       for Dy in Integer'Min (-Target_Region.X_Max, Target_Region.Y_Min) ..
          Integer'Max (Target_Region.X_Max, abs (Target_Region.Y_Min))
+      when In_Target_Region (Last_Possible ((Dx, Dy)))
       loop
 
-         if In_Target_Region (Last_Possible ((Dx, Dy))) then
-            Num_Solutions := Num_Solutions + 1;
-         end if;
+         Num_Solutions := Num_Solutions + 1;
 
       end loop;
 

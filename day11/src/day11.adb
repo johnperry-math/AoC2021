@@ -174,12 +174,10 @@ procedure Day11 is
          To_Do.Pop (Curr);
 
          Rows : for I in -1 .. 1 loop
-            Cols : for J in -1 .. 1 loop
-
-               if (I /= 0 or else J /= 0)
-                  and then Curr.Row + I in Row_Range
-                  and then Curr.Col + J in Col_Range
-               then
+            Cols : for J in -1 .. 1 when (I /= 0 or else J /= 0)
+               and then Curr.Row + I in Row_Range
+               and then Curr.Col + J in Col_Range
+            loop
 
                   Energy_Levels (Curr.Row + I, Curr.Col + J) := @ + 1;
 
@@ -190,8 +188,6 @@ procedure Day11 is
                      To_Do.Push ((Curr.Row + I, Curr.Col + J));
                      Done.Include ((Curr.Row + I, Curr.Col + J));
                   end if;
-
-               end if;
 
             end loop Cols;
          end loop Rows;
