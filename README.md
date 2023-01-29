@@ -527,3 +527,26 @@ A few things I've tried, with the results:
   because I had so badly misunderstood that remark.
   Re-reading it now, I may see how to implement it directly,
   but if I ever do try, it won't be tonight!
+
+### Day 20: Trench Map
+
+You have raw image data from the beacons and sensors,
+but you have to enhance it.
+This involves an "algorithm" which is really just a remapping of values.
+The image area is infinite, so you have to take that into account.
+
+1. Iterate the algorithm twice, report the number of lit pixels.
+1. Iterate the algorithm 48 more times, report the number of lit pixels.
+
+#### Tools
+
+* Ada's `Hashed_Set` type
+
+#### Experience
+
+Should have been fun and easy, but the example doesn't alert you
+to the potential pitfall that the puzzle has prepared.
+Since the image area is infinite,
+and areas outside the initial input are all 0,
+they will alternate between 0 and 511 if the algorithm / remapping so deems it.
+The example doesn't, but the puzzle does.
