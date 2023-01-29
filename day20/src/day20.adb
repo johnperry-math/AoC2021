@@ -4,7 +4,7 @@
 --
 -- Day 20: Trench Map
 --
--- part 1: iterate an "image enhancement algorithm" over raw data two times,
+-- part 1: iterate an "image enhancement Remapping" over raw data two times,
 --    report the number of lit pixels
 --
 -- part 2: iterate fifty times, report the number of lit pixels
@@ -24,7 +24,7 @@ procedure Day20 is
 
    type Response is ( Dark, Light );
 
-   Algorithm : array ( 1 .. 512 ) of Response;
+   Remapping : array ( 0 .. 511 ) of Response;
 
    type Position is record
       Row, Col: Integer;
@@ -48,12 +48,12 @@ procedure Day20 is
                     return Boolean
    is
    -- to account for the "twist" in this problem we check
-   -- whether we are doing the example, whose algorithm differs from the puzzle
+   -- whether we are doing the example, whose Remapping differs from the puzzle
    -- essentially, the puzzle responds to 0 and 511 in the OPPOSITE manner
    -- as the example, so that the infinite region beyond raw data is always
    -- alternating between lit and unlit
       (
-       if Doing_Example or else not Is_Even_Iter
+       if Remapping ( 0 ) = Dark or else not Is_Even_Iter
        then Pixels.Contains ( ( Row, Col ) )
        else Row < Row_Min
        or else Row > Row_Max
@@ -77,12 +77,12 @@ procedure Day20 is
 
       Text_IO.Open (Input_File, Text_IO.In_File, Filename);
 
-      -- get algorithm
+      -- get Remapping
       declare
          S : constant String := Text_IO.Get_Line ( Input_File );
       begin
-         for I in Algorithm'Range loop
-            Algorithm( I ) := ( if S( I ) = '.' then Dark else Light );
+         for I in Remapping'Range loop
+            Remapping( I ) := ( if S( I + 1 ) = '.' then Dark else Light );
          end loop;
       end;
 
@@ -126,7 +126,7 @@ procedure Day20 is
    -- Parts 1 and 2
 
    procedure Apply_Algorithm ( Is_Even_Iter : Boolean ) is
-   -- applies the algorithm rather thoughtlessly,
+   -- applies the Remapping rather thoughtlessly,
    -- relying on Is_Lit for the hard thinking
 
       New_Pixels : Pixel_Sets.Set;
@@ -155,7 +155,7 @@ procedure Day20 is
                      );
             begin
 
-               if Algorithm ( Key + 1 ) = Light then
+               if Remapping ( Key ) = Light then
                   New_Pixels.Include ( ( Row, Col ) );
                   New_Row_Min := Integer'Min ( New_Row_Min, Row );
                   New_Row_Max := Integer'Max ( New_Row_Max, Row );
