@@ -550,3 +550,15 @@ Since the image area is infinite,
 and areas outside the initial input are all 0,
 they will alternate between 0 and 511 if the algorithm / remapping so deems it.
 The example doesn't, but the puzzle does.
+
+#### Visualization
+
+I'm not sure there's anything to be gained from this visualization,
+but it wasn't too hard to make.
+
+[<img src="day20/all_50_iterations.gif" width="600">](day20/full_thing.gif)
+
+Some curiosities:
+* The bottom corners  remain largely right angles,
+  while the top corners "round off" over time.
+* Some patterns persist over time. Others, not so much.

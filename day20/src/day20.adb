@@ -17,6 +17,7 @@ procedure Day20 is
    package Text_IO renames Ada.Text_IO;
    --  package Integer_IO is new Ada.Text_IO.Integer_IO (Num => Integer);
 
+   Visualize : constant Boolean := True;
    Doing_Example : constant Boolean := False;
 
    -- SECTION
@@ -122,6 +123,38 @@ procedure Day20 is
    end Put_Image;
    pragma Warnings ( On, "procedure ""Put_Image"" is not referenced" );
 
+   procedure Write_To_Ppm ( Iteration : Natural ) is
+      Output_File : Text_IO.File_Type;
+      subtype Rows is Integer range -49 .. 150;
+      subtype Cols is Integer range -25 .. 150;
+      Width       : constant Positive := Cols'Last - Cols'First + 1;
+      Height      : constant Positive := Rows'Last - Rows'First + 1;
+   begin
+
+      Text_IO.Create (Output_File,
+                      Name => "solution" & Iteration'Image & ".ppm");
+      Text_IO.Put (Output_File, "P3");
+      Text_IO.Put (Output_File, Width'Image);
+      Text_IO.Put (Output_File, Height'Image);
+      Text_IO.Put (Output_File, " 255"); -- max color
+      Text_IO.New_Line (Output_File);
+
+      for Row in Rows'Range loop
+         for Col in Cols'Range loop
+            Text_IO.Put_Line
+               (Output_File,
+                ( if Is_Lit ( Iteration mod 2 = 1, Row, Col ) then "255 255 255"
+                 else "0 0 0"
+                )
+               );
+         end loop;
+      end loop;
+
+      Text_IO.Close (Output_File);
+
+   end Write_To_Ppm;
+
+
    -- SECTION
    -- Parts 1 and 2
 
@@ -181,17 +214,20 @@ begin
    Read_Input;
 
    -- Part 1
+   if Visualize then Write_To_Ppm ( 0 ); end if;
    Apply_Algorithm ( False );
+   if Visualize then Write_To_Ppm ( 1 ); end if;
    Apply_Algorithm ( True );
+   if Visualize then Write_To_Ppm ( 2 ); end if;
 
    Text_IO.Put_Line ( "after two iterations"
                       & Pixels.Length'Image & " pixels are lit");
 
    for I in 3 .. 50 loop
       Apply_Algorithm ( I mod 2 = 0 );
+      if Visualize then Write_To_Ppm ( I ); end if;
       Text_IO.Put_Line ( "after" & I'Image & " iterations"
                          & Pixels.Length'Image & " pixels are lit");
    end loop;
-
 
 end Day20;
