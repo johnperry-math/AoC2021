@@ -1,14 +1,15 @@
 with "config/day21_config.gpr";
+
 project Day21 is
 
-   for Source_Dirs use ("src/", "config/");
+   for Source_Dirs use ("src", "config");
    for Object_Dir use "obj/" & Day21_Config.Build_Profile;
    for Create_Missing_Dirs use "True";
    for Exec_Dir use "bin";
    for Main use ("day21.adb");
 
    package Compiler is
-      for Default_Switches ("ada") use ("-gnatW8", "-Og", "-ffunction-sections", "-fdata-sections", "-g", "-gnatX", "-gnatVa", "-gnatwa.X", "-gnatyaABbC-defhiIklM79nOprSux");
+      for Default_Switches ("ada") use ("-gnatW8", "-ffunction-sections", "-fdata-sections", "-g", "-O3", "-gnatn", "-funroll-loops", "-flto", "-gnato", "-gnatp", "-gnatVa", "-gnatwa.X", "-gnatyaABbC-defhiIklM79nOprSux");
    end Compiler;
 
    package Binder is
@@ -20,3 +21,4 @@ project Day21 is
    end Install;
 
 end Day21;
+

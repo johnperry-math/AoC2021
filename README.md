@@ -562,3 +562,55 @@ Some curiosities:
 * The bottom corners  remain largely right angles,
   while the top corners "round off" over time.
 * Some patterns persist over time. Others, not so much.
+
+## Day 21: Dirac Dice
+
+The computer decides to play you a game of Dirac Dice.
+The rules are pretty simple: given certain starting positions, you:
+* sum the results of three rolls of a die,
+* move your piece that many times around a circle numbered 1-10, and then
+* add the resulting position to your score (which starts at 0).
+
+1. Play the game with a deterministic die that returns the values 1, ..., 1000,
+   **in that order.**
+   Determine who reaches 1000 first, and return
+   the product of the loser's score and the number of die rolls.
+1. Play the game with a three-sided Dirac Die which splits the universe into 3
+   every time it's rolled: one universe for each possible result of the roll.
+   Report the number of games the winner wins, where winning is now
+   reaching 21 rather than 1000.
+
+### Tools
+
+1. Memoization, determined by _playing in reverse_; that is,
+   starting from the last possible position, and making one's way back.
+
+### Experience
+
+I loved the problem idea, got Part 1 without _too_ much trouble,
+and even had the right basic idea for Part 2, but made two crucial errors.
+
+1. I forgot that _each_ roll of the die splits the universe into 3,
+   and instead played it so that each _turn_ split the universe into 3.
+1. I neglected to reset Player 2's states every time Player 1 did not win.
+
+#### An optimization or three
+
+1. Rather than construct the 27 possible sums of die rolls via nested loops,
+   create them as a constant array, since there aren't too many, and
+   it isn't hard to determine them in advance.
+
+   As it happens, I _only_ managed to get this working in optimized form,
+   for I kept botching the run-time construction of the full 27 states.
+   Thus, I can't attribute any "improvement" to this optimization,
+   aside from the fact that I finally got it working.
+
+1. Rather than consider all 27 possible sums of die rolls,
+   consider only the 7 _distinct_ die rolls,
+   and adjust the results accordingly.
+
+   The second optimization improved performance from 439ms to 43ms.
+
+Full optimization, including the suppression of run-time checks,
+improved performance further to single-digit milliseconds;
+the fastest I observed was 6ms.
