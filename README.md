@@ -76,6 +76,12 @@ But for the fact that I did it wrong, this was fun.
 
 ## Days I completed after doing the example first
 
+The first couple of weeks went well, but after that it was downhill.
+By the end I was doing only one puzzle a week,
+because each one took me most of a day.
+I don't quite understand _why_ that happened,
+but the ramblings in the "Experience" section might help illuminate it.
+
 ### Day 5: Hydrothermal venture
 
 A bunch of hydrothermal vents.
@@ -614,3 +620,51 @@ and even had the right basic idea for Part 2, but made two crucial errors.
 Full optimization, including the suppression of run-time checks,
 improved performance further to single-digit milliseconds;
 the fastest I observed was 6ms.
+
+## Day 22: Reactor Reboot
+
+You have to reboot the reactor.
+This involves turning a bunch of cubes on and off.
+Each instruction to do this provide a rectangular cuboid,
+along with an indication to turn the cubes within it **on** or **off**.
+By applying the instructions in order, you reboot the reactor.
+
+1. Apply the initialization instructions; that is, those whose coordinates
+   lie entirely within -50..50. Determine the number of cubes lit.
+1. Do the same for the full list of instructions.
+
+### Tools
+
+1. Ada's `Vector` and `Long_Long_Integer` type. (the numbers get big)
+1. Basic set theory from mathematics:
+   * DeMorgan's laws for combining set union and intersection; and
+   * rules of cardinality for union and intersection.
+
+### Experience
+
+This was another long one for me.
+I solved Part 1 quickly, knowing the whole time
+that I'd have to use a different approach for Part 2.
+This solution remains in the git history, though not at head.
+
+For Part 2, I lost a lot of time trying to draw up procedures
+that would split any two intersecting rectangular cuboids into
+distinct rectangular cuboids.
+It kept getting complicated, so I abandoned this approach.
+
+I then thought of avoiding that altogether,
+instead adding or subtracting the number of cubes lit or unlit
+with each new instruction.
+That likely would have worked, but the approach I was using
+likewise became too complicated too quickly.
+
+Finally I surrendered and read through some other people's comments
+posted to the reddit thread.
+I realized quickly that
+[this solution](https://www.reddit.com/r/adventofcode/comments/rlxhmg/comment/hqxczc4)
+was essentially equivalent to what I was trying.
+I had even been using that set theory formula;
+and while I had thought of doing it iteratively,
+I didn't think to do it that way.
+So, while my solution is slightly different in its implementation
+and certainly in the language, the approach is basically that one.
