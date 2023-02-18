@@ -17,7 +17,7 @@ procedure Day23 is
 
    package Text_IO renames Ada.Text_IO;
 
-   Doing_Example : constant Boolean := True;
+   Doing_Example : constant Boolean := False;
 
    Doing_Part_1 : Boolean := True;
 
@@ -654,7 +654,9 @@ procedure Day23 is
          Amphipods := ( if Doing_Part_1 then Current.Amphipods_1
                         else Current.Amphipods_2 );
 
-         if Current.Energy <= Explored ( Amphipods ) then
+         if Current.Energy <= Explored ( Amphipods )
+            and then Current.Energy <= Min_Energy_To_Goal
+         then
 
             -- see where each amphipod can go
             for I in Amphipods'Range loop

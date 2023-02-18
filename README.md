@@ -668,3 +668,46 @@ and while I had thought of doing it iteratively,
 I didn't think to do it that way.
 So, while my solution is slightly different in its implementation
 and certainly in the language, the approach is basically that one.
+
+## Day 23: Amphipods
+
+Basically, a bunch of shrimp lookalikes of different colors,
+living together in a house (or something like a house),
+but only want to share bedrooms with other shrimp lookalikes of the same color.
+What makes this differ from your average breadth-first-search
+is that the different-colored shrimp use different amounts of energy.
+
+1. Determine a least-energy route that allows the amphipods to home
+   with only other amphipods.
+1. Turns out you missed a few. Repeat with the new amphipods.
+
+### Tools
+
+* Ada's `Hashed_Maps`, `Priority_Queue`, subtypes, and discriminated types.
+* Breadth-first search with some pruning by using optimal routes.
+
+### Experience
+
+This wasn't especially hard, but it took me a long while.
+In fact, it took me 3 hours just to get to where I could start testing.
+Alas, that preceded several hours of debugging... But I liked it OK.
+
+It's interesting that, at least in the example, the solution to Part 2
+occurs in a period where there are large gaps between newly-queued elements.
+
+#### Discussion of potential optimizations
+
+The puzzle solutions complete in roughly 3 minutes, 45 seconds on my machine.
+Curiously, part 2 took much, much less time, despite seeming more complicated;
+on my machine it took only about 15 seconds!
+I have this vague memory that part 1 was much faster
+before I adapted it for part 2, but I am not so sure.
+
+All the optimizations I tried worked, _so long as I implemented them correctly._
+But I have no idea how much they helped.
+
+* I suspect the current hash function is not very good,
+  and may be leading to clashes.
+* A better prioritization function would probably help.
+* I am probably queuing some "obviously" unsolvable configurations,
+  which will slow things down.
