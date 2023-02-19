@@ -145,6 +145,87 @@ procedure Day23 is
       end case;
    end record;
 
+   function State_Priority ( S : State ) return Natural is ( S.Energy );
+   -- for the priority queue
+
+   function State_Hash ( Amphipods : Amphipod_Array )
+                           return Ada.Containers.Hash_Type
+   is
+   -- for keeping track of previous work
+   -- this is probably not the best approach
+      ( if Amphipods'Length = 8 then
+           Ada.Containers.Hash_Type
+              (  Amphipods ( 1 ).Pos.Row * 3
+               + Amphipods ( 1 ).Pos.Col * 5
+               + Amphipods ( 2 ).Pos.Row * 7
+               + Amphipods ( 2 ).Pos.Col * 11
+               + Amphipods ( 3 ).Pos.Row * 13
+               + Amphipods ( 3 ).Pos.Col * 17
+               + Amphipods ( 4 ).Pos.Col * 19
+               + Amphipods ( 4 ).Pos.Col * 23
+               + Amphipods ( 5 ).Pos.Row * 29
+               + Amphipods ( 5 ).Pos.Col * 31
+               + Amphipods ( 6 ).Pos.Row * 37
+               + Amphipods ( 6 ).Pos.Col * 41
+               + Amphipods ( 7 ).Pos.Row * 43
+               + Amphipods ( 7 ).Pos.Col * 47
+               + Amphipods ( 8 ).Pos.Col * 53
+               + Amphipods ( 8 ).Pos.Col * 57
+              )
+        else
+           Ada.Containers.Hash_Type
+              (  Amphipods ( 1 ).Pos.Row * 3
+               + Amphipods ( 1 ).Pos.Col * 5
+               + Amphipods ( 2 ).Pos.Row * 7
+               + Amphipods ( 2 ).Pos.Col * 11
+               + Amphipods ( 3 ).Pos.Row * 13
+               + Amphipods ( 3 ).Pos.Col * 17
+               + Amphipods ( 4 ).Pos.Col * 19
+               + Amphipods ( 4 ).Pos.Col * 23
+               + Amphipods ( 5 ).Pos.Row * 29
+               + Amphipods ( 5 ).Pos.Col * 31
+               + Amphipods ( 6 ).Pos.Row * 37
+               + Amphipods ( 6 ).Pos.Col * 41
+               + Amphipods ( 7 ).Pos.Row * 43
+               + Amphipods ( 7 ).Pos.Col * 47
+               + Amphipods ( 8 ).Pos.Col * 53
+               + Amphipods ( 8 ).Pos.Col * 59
+               + Amphipods ( 9 ).Pos.Row * 61
+               + Amphipods ( 9 ).Pos.Col * 67
+               + Amphipods ( 10 ).Pos.Row * 71
+               + Amphipods ( 10 ).Pos.Col * 73
+               + Amphipods ( 11 ).Pos.Row * 79
+               + Amphipods ( 11 ).Pos.Col * 83
+               + Amphipods ( 12 ).Pos.Col * 89
+               + Amphipods ( 12 ).Pos.Col * 97
+               + Amphipods ( 13 ).Pos.Row * 101
+               + Amphipods ( 13 ).Pos.Col * 103
+               + Amphipods ( 14 ).Pos.Row * 107
+               + Amphipods ( 14 ).Pos.Col * 109
+               + Amphipods ( 15 ).Pos.Row * 113
+               + Amphipods ( 15 ).Pos.Col * 127
+               + Amphipods ( 16 ).Pos.Col * 131
+               + Amphipods ( 16 ).Pos.Col * 137
+              )
+       );
+
+   package Interfaces is new Ada.Containers.Synchronized_Queue_Interfaces
+      ( Element_Type => State );
+
+   package Queues is new Ada.Containers.Unbounded_Priority_Queues
+      ( Queue_Interfaces => Interfaces,
+        Queue_Priority   => Natural,
+        Get_Priority     => State_Priority,
+        Before           => "<"
+       );
+
+   package State_Maps is new Ada.Containers.Indefinite_Hashed_Maps
+      ( Key_Type       => Amphipod_Array,
+        Element_Type    => Natural,
+        Hash            => State_Hash,
+        Equivalent_Keys => "="
+       );
+
    -- SECTION
    -- I/O
 
@@ -381,6 +462,60 @@ procedure Day23 is
                )
        );
 
+   function Way_Is_Blocked ( A : Amphipod; Pos : Position; Current : State )
+                            return Boolean
+   is
+      Amphipods : Amphipod_Array
+         := ( if Current.Which = One then Current.Amphipods_1
+              else Current.Amphipods_2 );
+   begin
+      -- when moving in row 2, make sure no one else stands in the way
+      for Col in Positive'Min ( Pos.Col, A.Pos.Col )
+         .. Positive'Max ( Pos.Col, A.Pos.Col )
+      loop
+         for B of Amphipods loop
+            if A /= B and then B.Pos.Row = 2 and then B.Pos.Col = Col then
+               return True;
+            end if;
+         end loop;
+      end loop;
+
+      -- when moving into or out of row 2, make sure no one else is in the way
+      if Pos.Row /= A.Pos.Row then
+
+         -- moving from row 3 is taken care of by loop on moving in row 2
+         if A.Pos.Row > 3
+            and then ( for some B of Amphipods =>
+                           B.Pos.Col = A.Pos.Col
+                        and then B.Pos.Row < A.Pos.Row )
+         then
+            return True;
+         end if;
+
+         -- moving to row 3 is taken care of by loop on moving in row 2
+         if Pos.Row > 3
+            and then ( for some B of Amphipods =>
+                           B.Pos.Col = Pos.Col
+                        and then B.Pos.Row < Pos.Row )
+         then
+            return True;
+         end if;
+
+      elsif Pos.Row > 3 and then A.Pos.Row > 3 then
+
+         if ( for some B of Amphipods =>
+                  B.Pos.Row < A.Pos.Row and then B.Pos.Col = A.Pos.Col )
+            or else
+               ( for some B of Amphipods =>
+                     B.Pos.Row < Pos.Row and then B.Pos.Col = Pos.Col )
+         then
+            return True;
+         end if;
+
+      end if;
+      return False;
+   end Way_Is_Blocked;
+
    function Can_Travel ( A : Amphipod; Pos : Position; Current : State )
                         return Boolean
    is
@@ -392,7 +527,6 @@ procedure Day23 is
 
    begin
 
-      --  if Current.Energy = 3088 and then Pos.Row =
       -- don't move to same place
       if A.Pos.Row = Pos.Row and then A.Pos.Col = Pos.Col then
          return False;
@@ -425,49 +559,9 @@ procedure Day23 is
       -- impossible to move in row 2
       if Pos.Row = 2 and then Pos.Row = A.Pos.Row then return False; end if;
 
-      -- when moving in row 2, make sure no one else stands in the way
-      for Col in Positive'Min ( Pos.Col, A.Pos.Col )
-         .. Positive'Max ( Pos.Col, A.Pos.Col )
-      loop
-         for B of Amphipods loop
-            if A /= B and then B.Pos.Row = 2 and then B.Pos.Col = Col then
-               return False;
-            end if;
-         end loop;
-      end loop;
-
-      -- when moving into or out of row 2, make sure no one else is in the way
-      if Pos.Row /= A.Pos.Row then
-
-         -- moving from row 3 is taken care of by loop on moving in row 2
-         if A.Pos.Row > 3
-            and then ( for some B of Amphipods =>
-                           B.Pos.Col = A.Pos.Col
-                        and then B.Pos.Row < A.Pos.Row )
-         then
-            return False;
-         end if;
-
-         -- moving to row 3 is taken care of by loop on moving in row 2
-         if Pos.Row > 3
-            and then ( for some B of Amphipods =>
-                           B.Pos.Col = Pos.Col
-                        and then B.Pos.Row < Pos.Row )
-         then
-            return False;
-         end if;
-
-      elsif Pos.Row > 3 and then A.Pos.Row > 3 then
-
-         if ( for some B of Amphipods =>
-                  B.Pos.Row < A.Pos.Row and then B.Pos.Col = A.Pos.Col )
-            or else
-               ( for some B of Amphipods =>
-                     B.Pos.Row < Pos.Row and then B.Pos.Col = Pos.Col )
-         then
-            return False;
-         end if;
-
+      -- make sure the way isn't blocked
+      if Way_Is_Blocked ( A, Pos, Current ) then
+         return False;
       end if;
 
       -- when moving into room, make sure rule 2 is satisfied
@@ -486,6 +580,17 @@ procedure Day23 is
       return True;
 
    end Can_Travel;
+
+   function Can_Travel_Home ( A : Amphipod; Current : State ) return Boolean is
+   -- True iff A can travel to its home room
+
+      Col : Positive := Home_Room_Col ( A.Clr );
+      Result : Boolean := Room_Ready ( A.Clr, Current )
+         and then not Way_Is_Blocked ( A, ( 3, Col ), Current );
+
+   begin
+      return Result;
+   end Can_Travel_Home;
 
    function Energy_Cost ( A : Amphipod; Pos : Position ) return Natural is
    -- returns the cost for A to move to position Pos
@@ -509,93 +614,67 @@ procedure Day23 is
 
    end Energy_Cost;
 
+   procedure Enqueue ( I                  : Positive;
+                       Pos                : Position;
+                       Current            : State;
+                       To_Do              : in out Queues.Queue;
+                       Explored           : in out State_Maps.Map;
+                       Min_Energy_To_Goal : in out Natural
+                      )
+   is
+   -- enqueues in To_Do a modification of Current where
+   -- amphipod I moves to position Pos
+   --
+   -- does not verify that amphipod I can in fact move there,
+   -- so do that using the functions supplied above
+
+      New_Amphipods : Amphipod_Array
+         := ( if Doing_Part_1 then Current.Amphipods_1
+              else Current.Amphipods_2 );
+      A : Amphipod := New_Amphipods ( I );
+      New_Energy : Positive := Current.Energy + Energy_Cost ( A, Pos );
+
+   begin
+
+      New_Amphipods ( I ).Pos := Pos;
+
+      if New_Energy < Min_Energy_To_Goal and then
+         ( not Explored.Contains ( New_Amphipods )
+            or else Explored ( New_Amphipods ) > New_Energy
+           )
+      then
+
+         Explored.Include ( New_Amphipods, New_Energy );
+
+         if Reached_Goal ( New_Amphipods ) then
+            Min_Energy_To_Goal
+               := Natural'Min
+                  ( Min_Energy_To_Goal, New_Energy );
+         end if;
+
+         if Doing_Part_1 then
+            To_Do.Enqueue ( ( Which    => One,
+                              Energy      => New_Energy,
+                              Amphipods_1 => New_Amphipods
+                             ) );
+
+         else
+            To_Do.Enqueue ( ( Which    => Two,
+                              Energy      => New_Energy,
+                              Amphipods_2 => New_Amphipods
+                             ) );
+
+         end if;
+
+      end if;
+   end Enqueue;
+
    function Lowest_Energy return Natural is
    -- determines the least energy needed to rearrange the amphipods
    -- so that each is in its home room
    --
    -- the algorithm is breadth-first search, with ordering and pruning
    -- based on weight
-
-      function State_Priority ( S : State ) return Natural is ( S.Energy );
-      -- for the priority queue
-
-      function State_Hash ( Amphipods : Amphipod_Array )
-                           return Ada.Containers.Hash_Type
-      is
-      -- for keeping track of previous work
-      -- this is probably not the best approach
-         ( if Amphipods'Length = 8 then
-              Ada.Containers.Hash_Type
-                 (  Amphipods ( 1 ).Pos.Row * 3
-                  + Amphipods ( 1 ).Pos.Col * 5
-                  + Amphipods ( 2 ).Pos.Row * 7
-                  + Amphipods ( 2 ).Pos.Col * 11
-                  + Amphipods ( 3 ).Pos.Row * 13
-                  + Amphipods ( 3 ).Pos.Col * 17
-                  + Amphipods ( 4 ).Pos.Col * 19
-                  + Amphipods ( 4 ).Pos.Col * 23
-                  + Amphipods ( 5 ).Pos.Row * 29
-                  + Amphipods ( 5 ).Pos.Col * 31
-                  + Amphipods ( 6 ).Pos.Row * 37
-                  + Amphipods ( 6 ).Pos.Col * 41
-                  + Amphipods ( 7 ).Pos.Row * 43
-                  + Amphipods ( 7 ).Pos.Col * 47
-                  + Amphipods ( 8 ).Pos.Col * 53
-                  + Amphipods ( 8 ).Pos.Col * 57
-                 )
-           else
-              Ada.Containers.Hash_Type
-                 (  Amphipods ( 1 ).Pos.Row * 3
-                  + Amphipods ( 1 ).Pos.Col * 5
-                  + Amphipods ( 2 ).Pos.Row * 7
-                  + Amphipods ( 2 ).Pos.Col * 11
-                  + Amphipods ( 3 ).Pos.Row * 13
-                  + Amphipods ( 3 ).Pos.Col * 17
-                  + Amphipods ( 4 ).Pos.Col * 19
-                  + Amphipods ( 4 ).Pos.Col * 23
-                  + Amphipods ( 5 ).Pos.Row * 29
-                  + Amphipods ( 5 ).Pos.Col * 31
-                  + Amphipods ( 6 ).Pos.Row * 37
-                  + Amphipods ( 6 ).Pos.Col * 41
-                  + Amphipods ( 7 ).Pos.Row * 43
-                  + Amphipods ( 7 ).Pos.Col * 47
-                  + Amphipods ( 8 ).Pos.Col * 53
-                  + Amphipods ( 8 ).Pos.Col * 59
-                  + Amphipods ( 9 ).Pos.Row * 61
-                  + Amphipods ( 9 ).Pos.Col * 67
-                  + Amphipods ( 10 ).Pos.Row * 71
-                  + Amphipods ( 10 ).Pos.Col * 73
-                  + Amphipods ( 11 ).Pos.Row * 79
-                  + Amphipods ( 11 ).Pos.Col * 83
-                  + Amphipods ( 12 ).Pos.Col * 89
-                  + Amphipods ( 12 ).Pos.Col * 97
-                  + Amphipods ( 13 ).Pos.Row * 101
-                  + Amphipods ( 13 ).Pos.Col * 103
-                  + Amphipods ( 14 ).Pos.Row * 107
-                  + Amphipods ( 14 ).Pos.Col * 109
-                  + Amphipods ( 15 ).Pos.Row * 113
-                  + Amphipods ( 15 ).Pos.Col * 127
-                  + Amphipods ( 16 ).Pos.Col * 131
-                  + Amphipods ( 16 ).Pos.Col * 137
-                 )
-          );
-
-      package Interfaces is new Ada.Containers.Synchronized_Queue_Interfaces
-         ( Element_Type => State );
-
-      package Queues is new Ada.Containers.Unbounded_Priority_Queues
-         ( Queue_Interfaces => Interfaces,
-           Queue_Priority   => Natural,
-           Get_Priority     => State_Priority,
-           Before           => "<"
-          );
-
-      package State_Maps is new Ada.Containers.Indefinite_Hashed_Maps
-         ( Key_Type => Amphipod_Array,
-           Element_Type => Natural,
-           Hash         => State_Hash,
-           Equivalent_Keys => "="
-          );
 
       -- used throughout the algorithm
       To_Do    : Queues.Queue;
@@ -608,11 +687,6 @@ procedure Day23 is
       Last_Energy   : Natural := 0;
       Amphipods     : aliased Amphipod_Array
          := ( if Doing_Part_1 then Setup_Part_1 else Setup_Part_2 );
-
-      -- used when creating a new state to explore
-      New_Amphipods : Amphipod_Array
-         := ( if Doing_Part_1 then Setup_Part_1 else Setup_Part_2 );
-      New_Energy    : Natural;
 
       Min_Energy_To_Goal : Natural := Natural'Last;
 
@@ -663,53 +737,53 @@ procedure Day23 is
 
                A := Amphipods ( I );
 
-               for Row in 2 .. Map'Last ( 1 ) - 1 loop
-                  for Col in 2 .. 12 loop
+               if A.Pos.Col /= Home_Room_Col (A.Clr)
+                  and then Can_Travel_Home ( A, Current )
+               then
+                  -- choose best!
 
-                     Pos := ( Row, Col );
+                  declare
+                     Row : Positive := ( if Doing_Part_1 then 4 else 6 );
+                     Col : Positive := Home_Room_Col ( A.Clr );
+                  begin
 
-                     if Can_Travel ( A, Pos, Current ) then
+                     -- find lowest row A can move into
+                     for B of Amphipods
+                     when B.Clr = A.Clr and then B.Pos.Col = Col
+                     loop
+                           Row := Positive'Min ( Row, B.Pos.Row - 1 );
+                     end loop;
 
-                        New_Amphipods
-                           := ( if Doing_Part_1 then Current.Amphipods_1
-                                else Current.Amphipods_2 );
-                        New_Amphipods ( I ).Pos := ( Row, Col );
-                        New_Energy := Current.Energy + Energy_Cost ( A, Pos );
+                     Enqueue ( I, ( Row, Col ), Current,
+                               To_Do, Explored, Min_Energy_To_Goal );
+                     --  Text_IO.Put_Line (A.Clr'Image & " at"
+                     --                    & A.Pos.Row'Image & A.Pos.Col'Image
+                     --                    & " traveled home to"
+                     --                    & Row'Image & Col'Image );
+                     --  Draw_Map ( Current );
+                     --  Text_IO.New_Line;
 
-                        if New_Energy < Min_Energy_To_Goal and then
-                           ( not Explored.Contains ( New_Amphipods )
-                              or else Explored ( New_Amphipods ) > New_Energy
-                             )
-                        then
+                  end;
 
-                           Explored.Include ( New_Amphipods, New_Energy );
+               else
+                  -- try others
 
-                           if Reached_Goal ( New_Amphipods ) then
-                              Min_Energy_To_Goal
-                                 := Natural'Min
-                                    ( Min_Energy_To_Goal, New_Energy );
-                           end if;
+                  for Row in 2 .. Map'Last ( 1 ) - 1 loop
+                     for Col in 2 .. 12 loop
 
-                           if Doing_Part_1 then
-                              To_Do.Enqueue ( ( Which    => One,
-                                                Energy      => New_Energy,
-                                                Amphipods_1 => New_Amphipods
-                                               ) );
+                        Pos := ( Row, Col );
 
-                           else
-                              To_Do.Enqueue ( ( Which    => Two,
-                                                Energy      => New_Energy,
-                                                Amphipods_2 => New_Amphipods
-                                               ) );
+                        if Can_Travel ( A, Pos, Current ) then
 
-                           end if;
+                           Enqueue ( I, Pos, Current,
+                                     To_Do, Explored, Min_Energy_To_Goal );
 
                         end if;
 
-                     end if;
-
+                     end loop;
                   end loop;
-               end loop;
+
+               end if;
 
             end loop;
 

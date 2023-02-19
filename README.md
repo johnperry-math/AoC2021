@@ -688,26 +688,58 @@ is that the different-colored shrimp use different amounts of energy.
 
 ### Experience
 
+After coming up with an optimization that reduced running time
+to roughly 1/7 of what it was before,
+I'm very pleased with this attempt.
+It's many times slower than what I see posted in some places online,
+but I suspect that may be due
+to differences in algorithms and/or data structures.
+
 This wasn't especially hard, but it took me a long while.
 In fact, it took me 3 hours just to get to where I could start testing.
 Alas, that preceded several hours of debugging... But I liked it OK.
 
-It's interesting that, at least in the example, the solution to Part 2
+It's interesting that the solution to Part 2
 occurs in a period where there are large gaps between newly-queued elements.
 
 #### Discussion of potential optimizations
 
-The puzzle solutions complete in roughly 3 minutes, 45 seconds on my machine.
+_(out of date)_
+~~The puzzle solutions complete in roughly 3 minutes, 45 seconds on my machine.
 Curiously, part 2 took much, much less time, despite seeming more complicated;
 on my machine it took only about 15 seconds!
 I have this vague memory that part 1 was much faster
-before I adapted it for part 2, but I am not so sure.
+before I adapted it for part 2, but I am not so sure.~~
 
-All the optimizations I tried worked, _so long as I implemented them correctly._
+The puzzle solutions complete in roughly 35 seconds on my machine.
+They used to take roughly 3 minutes, 45 seconds, but I realized
+that when an amphipod can travel to its home room,
+there is no point in considering other possibilities!
+The function `Can_Travel_Home` now takes that into account,
+with a remarkable effect on queue size
+and the indicated 7-fold improvement in execution time.
+
+Previous optimizations I tried also helped,
+_so long as I implemented them correctly._
 But I have no idea how much they helped.
 
+Things not yet tried:
+* **(worth considering!)** A better prioritization function could help.
+  Currently I look only at the current energy usage,
+  but perhaps I should look at "estimated distance to travel home".
+  This comes to mind especially when I read online
+  that some people used an A* algorithm.
 * I suspect the current hash function is not very good,
   and may be leading to clashes.
-* A better prioritization function would probably help.
+  Off the top of my head,
+  the Chinese Remainder Theorem suggests that I should use:
+  * 7 as the smallest prime multiple for a row, and
+  * 13 as the smallest prime multiple for a column.
+
+  However, I haven't written much down on it,
+  and I don't think it's having that much of an effect,
+  especially now that the queue size is more reasonable.
 * I am probably queuing some "obviously" unsolvable configurations,
-  which will slow things down.
+  which slow things down.
+  I have not thought enough about this to have an opinion
+  as to whether it's worth the effort.
