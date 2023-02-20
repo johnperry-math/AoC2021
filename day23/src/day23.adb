@@ -9,6 +9,7 @@
 -- part 2: whoops, there are more amphipods -- do the same
 
 with Ada.Text_IO;
+with Ada.Containers.Indefinite_Vectors;
 with Ada.Containers.Indefinite_Hashed_Maps;
 with Ada.Containers.Unbounded_Priority_Queues;
 with Ada.Containers.Synchronized_Queue_Interfaces;
@@ -136,12 +137,22 @@ procedure Day23 is
 
    type Part is ( One, Two );
 
+   package Amphipod_Array_1_Vectors is new Ada.Containers.Indefinite_Vectors
+      ( Index_Type => Positive,
+        Element_Type => Amphipod_Array_1
+       );
+
+   package Amphipod_Array_2_Vectors is new Ada.Containers.Indefinite_Vectors
+      ( Index_Type => Positive,
+        Element_Type => Amphipod_Array_2
+       );
+
    type State ( Which : Part := One ) is record
    -- used for breadth-first search lower down
       Energy : Natural;
       case Which is
-         when One => Amphipods_1 : Amphipod_Array_1;
-         when Two => Amphipods_2 : Amphipod_Array_2;
+         when One => Amphipods_1 : Amphipod_Array_1_Vectors.Vector;
+         when Two => Amphipods_2 : Amphipod_Array_2_Vectors.Vector;
       end case;
    end record;
 
@@ -328,12 +339,12 @@ procedure Day23 is
 
    end Read_Input;
 
-   procedure Draw_Map ( S : State ) is
-   -- draws the current state of the map corresponding to S
-   -- we start with a generic raster that represents the map,
-   -- write the amphipods onto it, then print that out
+   procedure Draw_Amphipods ( Amphipods : Amphipod_Array ) is
+      type Raster is array ( 1 .. 7, 1 .. 13 ) of Character;
 
-      Raster : array ( 1 .. 7, 1 .. 13 ) of Character
+      Last_Row : Positive := ( if Doing_Part_1 then 5 else 7 );
+
+      Background : Raster
          := ( ( others => '#' ),
               ( 1 | 13 => '#', others => '.' ),
               ( 4 | 6 | 8 | 10 => '.', others => '#' ),
@@ -346,16 +357,10 @@ procedure Day23 is
                 others          => '#' ),
               ( 1 | 2 | 12 | 13 => ' ', others => '#' )
              );
-
-      Amphipods : Amphipod_Array
-         := ( if S.Which = One then S.Amphipods_1 else S.Amphipods_2 );
-
-      Last_Row : Positive := ( if Doing_Part_1 then 5 else 7 );
-
    begin
 
       for A of Amphipods loop
-         Raster ( A.Pos.Row , A.Pos.Col ) :=
+         Background ( A.Pos.Row , A.Pos.Col ) :=
             ( case A.Clr is
                  when Amber => 'A',
                  when Bronze => 'B',
@@ -365,14 +370,50 @@ procedure Day23 is
              );
       end loop;
 
-      Text_IO.Put_Line ( "state with energy" & S.Energy'Image );
-
       for Row in 1 .. Last_Row loop
          for Col in Raster'Range (2) loop
-            Text_IO.Put ( Raster ( Row, Col ) );
+            Text_IO.Put ( Background ( Row, Col ) );
          end loop;
          Text_IO.New_Line;
       end loop;
+
+   end Draw_Amphipods;
+
+   procedure Draw_Map ( S : State ) is
+   -- draws the current state of the map corresponding to S
+   -- we start with a generic raster that represents the map,
+   -- write the amphipods onto it, then print that out
+
+   begin
+
+      if Doing_Part_1 then
+
+         declare
+            Vec : Amphipod_Array_1_Vectors.Vector := S.Amphipods_1;
+         begin
+
+            for Amphipods of Vec loop
+               Draw_Amphipods ( Amphipods );
+            end loop;
+
+         end;
+
+      else
+
+         declare
+            Vec : Amphipod_Array_2_Vectors.Vector := S.Amphipods_2;
+         begin
+
+            for Amphipods of Vec loop
+               Draw_Amphipods ( Amphipods );
+            end loop;
+
+         end;
+
+
+      end if;
+
+      Text_IO.Put_Line ( "final energy" & S.Energy'Image );
 
    end Draw_Map;
 
@@ -397,7 +438,8 @@ procedure Day23 is
    -- returns True if the only occupants of C's home room are of color C
 
       Amphipods : Amphipod_Array
-         := ( if S.Which = One then S.Amphipods_1 else S.Amphipods_2 );
+         := ( if S.Which = One then S.Amphipods_1.Last_Element
+              else S.Amphipods_2.Last_Element );
 
    begin
 
@@ -466,8 +508,8 @@ procedure Day23 is
                             return Boolean
    is
       Amphipods : Amphipod_Array
-         := ( if Current.Which = One then Current.Amphipods_1
-              else Current.Amphipods_2 );
+         := ( if Current.Which = One then Current.Amphipods_1.Last_Element
+              else Current.Amphipods_2.Last_Element );
    begin
       -- when moving in row 2, make sure no one else stands in the way
       for Col in Positive'Min ( Pos.Col, A.Pos.Col )
@@ -522,8 +564,8 @@ procedure Day23 is
    -- True iff A can travel to Pos given the Current state
 
       Amphipods : Amphipod_Array
-         := ( if Current.Which = One then Current.Amphipods_1
-              else Current.Amphipods_2 );
+         := ( if Current.Which = One then Current.Amphipods_1.Last_Element
+              else Current.Amphipods_2.Last_Element );
 
    begin
 
@@ -629,8 +671,8 @@ procedure Day23 is
    -- so do that using the functions supplied above
 
       New_Amphipods : Amphipod_Array
-         := ( if Doing_Part_1 then Current.Amphipods_1
-              else Current.Amphipods_2 );
+         := ( if Doing_Part_1 then Current.Amphipods_1.Last_Element
+              else Current.Amphipods_2.Last_Element );
       A : Amphipod := New_Amphipods ( I );
       New_Energy : Positive := Current.Energy + Energy_Cost ( A, Pos );
 
@@ -653,16 +695,30 @@ procedure Day23 is
          end if;
 
          if Doing_Part_1 then
-            To_Do.Enqueue ( ( Which    => One,
-                              Energy      => New_Energy,
-                              Amphipods_1 => New_Amphipods
-                             ) );
+
+            declare
+               New_Vecs : Amphipod_Array_1_Vectors.Vector
+                  := Amphipod_Array_1_Vectors.Copy ( Current.Amphipods_1 );
+            begin
+               New_Vecs.Append ( New_Amphipods );
+               To_Do.Enqueue ( ( Which    => One,
+                                 Energy      => New_Energy,
+                                 Amphipods_1 => New_Vecs
+                                ) );
+            end;
 
          else
-            To_Do.Enqueue ( ( Which    => Two,
-                              Energy      => New_Energy,
-                              Amphipods_2 => New_Amphipods
-                             ) );
+
+            declare
+               New_Vecs : Amphipod_Array_2_Vectors.Vector
+                  := Amphipod_Array_2_Vectors.Copy ( Current.Amphipods_2 );
+            begin
+               New_Vecs.Append ( New_Amphipods );
+               To_Do.Enqueue ( ( Which    => Two,
+                                 Energy      => New_Energy,
+                                 Amphipods_2 => New_Vecs
+                                ) );
+            end;
 
          end if;
 
@@ -693,22 +749,36 @@ procedure Day23 is
    begin
 
       -- prime the queue
-      To_Do.Enqueue
-         ( if Doing_Part_1 then ( Energy => 0,
-                                  Which       => One,
-                                  Amphipods_1 => Setup_Part_1 )
-           else  ( Energy     => 0,
-                   Which       => Two,
-                   Amphipods_2 => Setup_Part_2 )
-            );
-      Explored.Include
-         ( ( if Doing_Part_1 then Setup_Part_1 else Setup_Part_2 ), 0 );
+      if Doing_Part_1 then
+
+         declare
+            New_Vec : Amphipod_Array_1_Vectors.Vector;
+         begin
+            New_Vec.Append ( Setup_Part_1 );
+            To_Do.Enqueue
+               ( ( Energy => 0, Which => One, Amphipods_1 => New_Vec ) );
+            Explored.Include ( Setup_Part_1, 0 );
+         end;
+
+      else
+
+         declare
+            New_Vec : Amphipod_Array_2_Vectors.Vector;
+         begin
+            New_Vec.Append ( Setup_Part_2 );
+            To_Do.Enqueue
+               ( ( Energy => 0, Which => Two, Amphipods_2 => New_Vec ) );
+            Explored.Include ( Setup_Part_2, 0 );
+         end;
+
+      end if;
 
       loop
 
          To_Do.Dequeue ( Current );
-         if Reached_Goal ( ( if Doing_Part_1 then Current.Amphipods_1
-                           else Current.Amphipods_2 ) )
+         if Reached_Goal
+            ( ( if Doing_Part_1 then Current.Amphipods_1.Last_Element
+              else Current.Amphipods_2.Last_Element ) )
          then
             Draw_Map ( Current );
             return Current.Energy;
@@ -720,13 +790,15 @@ procedure Day23 is
             if Last_Energy mod 100 = 0 then
                Text_IO.Put ( "considering energy" & Last_Energy'Image );
                Text_IO.Put_Line ( " queue size:" & To_Do.Current_Use'Image );
-               Draw_Map ( Current );
+               Draw_Amphipods
+                  ( if Doing_Part_1 then Current.Amphipods_1.Last_Element
+                    else Current.Amphipods_2.Last_Element);
                Text_IO.New_Line;
             end if;
          end if;
 
-         Amphipods := ( if Doing_Part_1 then Current.Amphipods_1
-                        else Current.Amphipods_2 );
+         Amphipods := ( if Doing_Part_1 then Current.Amphipods_1.Last_Element
+                        else Current.Amphipods_2.Last_Element );
 
          if Current.Energy <= Explored ( Amphipods )
             and then Current.Energy <= Min_Energy_To_Goal
@@ -806,7 +878,6 @@ begin
    if not Doing_Example then
       Read_Input ( Setup_Part_2 );
    end if;
-   Draw_Map ( ( Two, 0, Setup_Part_2 ) );
    Text_IO.Put_Line ( "the lowest energy is" & Lowest_Energy'Image );
 
 end Day23;
