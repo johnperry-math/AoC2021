@@ -671,11 +671,11 @@ and certainly in the language, the approach is basically that one.
 
 ## Day 23: Amphipods
 
-Basically, a bunch of shrimp lookalikes of different colors,
+Basically, a bunch of shrimp-lookalikes of different colors,
 living together in a house (or something like a house),
-but only want to share bedrooms with other shrimp lookalikes of the same color.
-What makes this differ from your average breadth-first-search
-is that the different-colored shrimp use different amounts of energy.
+want to share bedrooms only with shrimp-lookalikes of the same color.
+This differ from your average breadth-first-search
+in that the different-colored shrimp-lookalikes use different amounts of energy.
 
 1. Determine a least-energy route that allows the amphipods to home
    with only other amphipods.
@@ -685,6 +685,7 @@ is that the different-colored shrimp use different amounts of energy.
 
 * Ada's `Hashed_Maps`, `Priority_Queue`, subtypes, and discriminated types.
 * Breadth-first search with some pruning by using optimal routes.
+* More pruning.
 
 ### Experience
 
@@ -696,27 +697,22 @@ but I suspect that may be due
 to differences in algorithms and/or data structures.
 
 This wasn't especially hard, but it took me a long while.
-In fact, it took me 3 hours just to get to where I could start testing.
+In fact, it took 3 hours just to get to where I could start testing.
 Alas, that preceded several hours of debugging... But I liked it OK.
 
-It's interesting that the solution to Part 2
-occurs in a period where there are large gaps between newly-queued elements.
+Interestingly, the solution to Part 2 occured
+for both the example and the input at a point
+where energy levels start to jump by relatively large amounts.
+This may be a side effect of some optimizations, though.
 
 #### Discussion of potential optimizations
-
-_(out of date)_
-~~The puzzle solutions complete in roughly 3 minutes, 45 seconds on my machine.
-Curiously, part 2 took much, much less time, despite seeming more complicated;
-on my machine it took only about 15 seconds!
-I have this vague memory that part 1 was much faster
-before I adapted it for part 2, but I am not so sure.~~
 
 The puzzle solutions complete in roughly 35 seconds on my machine.
 They used to take roughly 3 minutes, 45 seconds, but I realized
 that when an amphipod can travel to its home room,
-there is no point in considering other possibilities!
+there is no point in considering other possible routes for that amphipod!
 The function `Can_Travel_Home` now takes that into account,
-with a remarkable effect on queue size
+with a remarkable effect on queue size (at least a factor of 10)
 and the indicated 7-fold improvement in execution time.
 
 Previous optimizations I tried also helped,
