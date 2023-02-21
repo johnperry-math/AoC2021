@@ -743,3 +743,22 @@ Things not yet tried:
   which slow things down.
   I have not thought enough about this to have an opinion
   as to whether it's worth the effort.
+
+#### Visualization
+
+The colors chosen may make it hard to distinguish the amphipods,
+but these are the colors the puzzle specifies,
+using Wikipedia's sRGB tuples for
+[Amber](https://en.wikipedia.org/wiki/Amber_(color)),
+[Bronze](https://en.wikipedia.org/wiki/Bronze_(color)),
+[Copper](https://en.wikipedia.org/wiki/Copper_(color)),
+and [Desert](https://en.wikipedia.org/wiki/Desert_sand_(color)#Desert),
+which are.
+
+_Part 1:_
+
+[<img src="day23/part_1.gif" width="650">](day23/part_1.gif)
+
+_Part 1:_
+
+[<img src="day23/part_2.gif" width="650">](day23/part_2.gif)

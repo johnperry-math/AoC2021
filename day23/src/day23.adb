@@ -22,6 +22,8 @@ procedure Day23 is
 
    Doing_Part_1 : Boolean := True;
 
+   Visualize : Boolean := False;
+
    -- SECTION
    -- global types and variables
 
@@ -51,7 +53,8 @@ procedure Day23 is
 
    type Filler is ( Wall, Space, Unreachable, Creature );
 
-   Map : constant array ( 1 .. 7, 1 .. 13 ) of Filler
+   Num_Cols : constant Positive := 13;
+   Map      : constant array ( 1 .. 7, 1 .. Num_Cols ) of Filler
    -- this is just the map; amphipods are not stored in this structure
    -- this map is designed to work for both parts 1 and 2, which means
    -- i have to be careful when reading it
@@ -417,6 +420,106 @@ procedure Day23 is
 
    end Draw_Map;
 
+   procedure Write_To_Ppm ( S : State ) is
+
+      Output_File : Text_IO.File_Type;
+
+      Scale       : constant Positive := 100;
+      Last_Row    : constant Positive := ( if Doing_Part_1 then 5 else 7 );
+
+      subtype Rows is Integer range 1 .. Scale * Last_Row;
+      subtype Cols is Integer range 1 .. Scale * Num_Cols;
+
+      Width       : constant Positive := Cols'Last - Cols'First + 1;
+      Height      : constant Positive := Rows'Last - Rows'First + 1;
+
+      Num_States  : constant Positive
+         := Positive ( if Doing_Part_1 then S.Amphipods_1.Length
+                       else S.Amphipods_2.Length );
+
+   begin
+
+      for Step in 1 .. Num_States loop
+
+         Text_IO.Create (Output_File,
+                         Name => "state_"
+                         & ( if Doing_Part_1 then "1_" else "2_" )
+                         & Step'Image & ".ppm");
+         Text_IO.Put (Output_File, "P3");
+         Text_IO.Put (Output_File, Width'Image);
+         Text_IO.Put (Output_File, Height'Image);
+         Text_IO.Put (Output_File, " 255"); -- max color
+         Text_IO.New_Line (Output_File);
+
+         for Row in 1 .. Last_Row loop
+
+            declare
+               type Color is ( Red, Green, Blue );
+               type Colors is array ( Color ) of Natural;
+               Scanline : array ( 1 .. Num_Cols ) of Colors;
+               Pixels_Written : Natural := 0;
+            begin
+
+               for Col in 1 .. Num_Cols loop
+
+                  declare
+                     Pixel : Colors;
+                     Amphipods : Amphipod_Array
+                        := ( if Doing_Part_1 then S.Amphipods_1 ( Step )
+                             else S.Amphipods_2 ( Step ) );
+                  begin
+
+                     Pixel := ( case Map ( Row, Col ) is
+                                   when Space => ( 255, 255, 255 ),
+                                   when others => ( 0, 0, 0 )
+                               );
+
+                     if Row = Last_Row then Pixel := ( 0, 0, 0 ); end if;
+
+                     for A of Amphipods loop
+                        if A.Pos.Row = Row and then A.Pos.Col = Col then
+                           Pixel := ( case A.Clr is
+                                         when Amber => ( 255, 191, 1 ),
+                                         when Bronze => ( 205, 127, 50 ),
+                                         when Copper => ( 184, 115, 51 ),
+                                         when Desert => ( 193, 154, 107 )
+                                     );
+                           exit;
+                        end if;
+                     end loop;
+
+                     Scanline ( Col ) := Pixel;
+
+                  end;
+
+               end loop;
+
+               for Scale_Row in 1 .. Scale loop
+                  for Col in 1 .. Num_Cols loop
+
+                     for Scale_Col in 1 .. Scale loop
+                        Text_IO.Put_Line ( Output_File,
+                                           Scanline ( Col ) ( Red )'Image
+                                           & Scanline ( Col ) ( Green )'Image
+                                           & Scanline ( Col ) ( Blue )'Image );
+                        Pixels_Written := Pixels_Written + 1;
+                     end loop;
+
+                  end loop;
+               end loop;
+
+            end;
+
+         end loop;
+
+         Text_IO.Close (Output_File);
+
+      end loop;
+
+   end Write_To_Ppm;
+
+
+
    -- SECTION
    -- common to both Parts 1 and 2
 
@@ -700,7 +803,11 @@ procedure Day23 is
                New_Vecs : Amphipod_Array_1_Vectors.Vector
                   := Amphipod_Array_1_Vectors.Copy ( Current.Amphipods_1 );
             begin
-               New_Vecs.Append ( New_Amphipods );
+               if Visualize then
+                  New_Vecs.Append ( New_Amphipods );
+               else
+                  New_Vecs ( 1 ) := New_Amphipods;
+               end if;
                To_Do.Enqueue ( ( Which    => One,
                                  Energy      => New_Energy,
                                  Amphipods_1 => New_Vecs
@@ -713,7 +820,11 @@ procedure Day23 is
                New_Vecs : Amphipod_Array_2_Vectors.Vector
                   := Amphipod_Array_2_Vectors.Copy ( Current.Amphipods_2 );
             begin
-               New_Vecs.Append ( New_Amphipods );
+               if Visualize then
+                  New_Vecs.Append ( New_Amphipods );
+               else
+                  New_Vecs ( 1 ) := New_Amphipods;
+               end if;
                To_Do.Enqueue ( ( Which    => Two,
                                  Energy      => New_Energy,
                                  Amphipods_2 => New_Vecs
@@ -780,7 +891,10 @@ procedure Day23 is
             ( ( if Doing_Part_1 then Current.Amphipods_1.Last_Element
               else Current.Amphipods_2.Last_Element ) )
          then
-            Draw_Map ( Current );
+            if Visualize then
+               Draw_Map ( Current );
+               Write_To_Ppm ( Current );
+            end if;
             return Current.Energy;
          end if;
 
