@@ -470,8 +470,8 @@ but they seem to use a different algorithm.
 A few things I've tried, with the results:
 * **suppressing computations that have already occurred**
 
-  `Correlate` performs on each axis every rotation that is a multiple of 90�.
-  This na�ve approach creates 64 transformations, but only 24 are distinct.
+  `Correlate` performs on each axis every rotation that is a multiple of 90°.
+  This naïve approach creates 64 transformations, but only 24 are distinct.
   To prevent this, I introduced the variables `Ref_Pos`, `Tried_Positions`,
   and `Ref_Pos_Vec`, explained slightly out of order:
   * The first is the `Position` `(1,2,3)`, which is placed into the third.
@@ -513,7 +513,7 @@ A few things I've tried, with the results:
 
   This was a **very successful** optimization
   with a dramatic reduction in execution time from ~20 seconds to ~5.
-* **adjusting one axis' facing, then rotating the other axes 90�**
+* **adjusting one axis' facing, then rotating the other axes 90°**
 
   This is inspired from the puzzle's own wording:
 
@@ -758,3 +758,102 @@ _Part 1:_
 _Part 1:_
 
 [<img src="day23/part_2.gif" width="650">](day23/part_2.gif)
+
+## Day 24: Arithmetic Logic Unit
+
+You need to validate the submarine's model number.
+This requires you to determine
+1. the largest possible valid model number,
+   so as to activate as many features as possible; and
+1. the smallest possible valid model number, because it turns out that, oh no,
+   you don't need all those feature after all.
+
+A model number is "valid" if
+the result of an Arithmetic Logic Unit program returns 0
+when provided that number as input.
+
+### Tools
+
+1. ranges
+2. discriminated types
+3. my noggin
+
+### Experience
+
+This took a while, but was fun.
+I started off working by hand, and after one false start I realized
+that we were basically looking at the following pseudocode:
+
+    let z := () -- an empty sequence
+    for w in ( input_1, ... input_14)
+       let x := ( if z has a last element then z's last element, else 0 )
+       if index ( w ) ∈ ( 6, 7, 9, 11 .. 14 )
+          remove z's last element
+       let A := ( 10, 10, 14, 11, 14, -14, 0, 10, -10, 13, -12, -3, -11, -2 )
+       add A ( index ( w ) ) to x
+       let appending := x ≠ w
+       let B := ( 2, 4, 8, 7, 12, 7, 10, 14, 2, 6, 8, 11, 5, 11 )
+       if appending then append w + B ( index ( w ) ) to z
+    Result := z is empty
+
+(Some details might be slightly off, but this is essentially correct.)
+
+Why does this work?
+* Throughout the algorithm, register `z` is multiplied and divided only by 26,
+  and it is easy to verify that any value added to it lie between -25 and 25.
+  Thus, it is a "base 26" number,
+  and we can view it as a sequence of "base 26" digits
+  that we append or remove.
+  Whether we append or remove depends on:
+  * removal is determined by the appearance of `div z 26` instead of `div z 1`
+    in line 5 of each ALU block;
+  * appending in line 18 occurs exactly when register `y` is 1 or 26 in line 13,
+    because both of those depend on the value of `x` computed in line 8;
+  * _it just so happens_ that these work out to be mutually exclusive:
+    you append in lines 13 and 18 if and only if you remove,
+    precisely because `x` in line 8 is zero only on those occasions
+    where `index ( w ) in ( 6, 7, 9, 11 .. 14 )`.
+* As a result, everything -- _everything_ -- hinges on whether
+  registers `w` and `x` are equal in line 7.
+* When `index ( w ) ∈ ( 6, 7, 9, 11 .. 14 )` is _false_,  it _just so happens_
+  that you are adding a value to `x` that makes it larger than 9.
+  Since the input digit is always in the range 1 .. 9, registers `x` and `w`
+  will be _un_equal, which means you're adding to register `z`.
+  Otherwise, you're dividing by 26 and truncating the remainder,
+  which is equivalent to removing the last base-26 digit.
+
+That's more or less the idea of the program.
+For _validation_, the basic idea is that you want 0 at the end,
+which means you need to remove as many base-26 digits from `z` as you add to it.
+* As noted above, you remove from `z` only when
+  registers `w` and `x` agree at line 7 of each 18-line block,
+  so you want to make that happen.
+* Since register `w` is always a digit from 1 to 9,
+  it _can't_ agree with register `x` whenever it's larger than 9,
+  and this is _guaranteed_ to happen when `index ( w ) ∈ ( 1 .. 5, 8, 10 )`.
+* That means we need to ensure they agree on the other indices.
+  To do that, we record the constraint on `x` and `w`,
+  which is really a constraint on the inputs.
+
+At program end, we print the constraints
+and use them to compute the desired constants.
+
+After doing it by hand and obtaining the correct answers,
+I decided to write an Ada program that would do the same thing.
+Again I had a false start, trying to make it more complicated than it had to be,
+but the resulting program should work on any input so long as
+it shares the following properties with my input:
+* the ALU program has 14 blocks of 18 steps each,
+  which proceed with the same sequence of instructions
+  (if not the same parameters);
+* the program handles registers in the same way; that is:
+  * input is always to `w`,
+  * `x` always copies `z`'s last base-26 digit, adjusts it,
+    and compares it to the input;
+  * `y` modifies `z`.
+
+  If this is not the case, then you _may_ have to rename the variables.
+  The kicker is that the program only "thinks" about the `x` and `z` variables
+  (more or less like the pseudocode above!)
+  so if your `x` and `z` have the same semantics as mine,
+  then you shouldn't have to change anything!

@@ -9,7 +9,7 @@ project Day23 is
    for Main use ("day23.adb");
 
    package Compiler is
-      for Default_Switches ("ada") use ("-gnatW8", "-ffunction-sections", "-fdata-sections", "-g", "-gnat2020", "-O3", "-gnatn", "-funroll-loops", "-gnatp", "-gnatyaABbC-defhiIklM79nOprSux");
+      for Default_Switches ("ada") use ("-gnatW8", "-ffunction-sections", "-fdata-sections", "-g", "-gnat2020", "-O3", "-gnatn", "-funroll-loops", "-gnatp", "-flto", "-gnatyaABbC-defhiIklM79nOprSux");
    end Compiler;
 
    package Binder is
