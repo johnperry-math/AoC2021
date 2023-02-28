@@ -857,3 +857,23 @@ it shares the following properties with my input:
   (more or less like the pseudocode above!)
   so if your `x` and `z` have the same semantics as mine,
   then you shouldn't have to change anything!
+
+## Day 25: Sea Cucumber
+
+You need to land, but a bunch of sea cucumbers are in the way.
+Some move east, some move south.
+
+1. How long will it take until the formation stops moving?
+1. Freebie.
+
+### Tools
+
+* Nuthin' unusual
+
+### Experience
+
+Fun and easy, a welcome reprieve after the last few puzzles.
+
+### Visualization
+
+Forthcoming
