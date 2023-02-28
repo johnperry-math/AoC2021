@@ -876,4 +876,4 @@ Fun and easy, a welcome reprieve after the last few puzzles.
 
 ### Visualization
 
-Forthcoming
+[<img src="day25/full_thing.gif" width="500">](day25/full_thing.gif)

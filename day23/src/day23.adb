@@ -518,8 +518,6 @@ procedure Day23 is
 
    end Write_To_Ppm;
 
-
-
    -- SECTION
    -- common to both Parts 1 and 2
 

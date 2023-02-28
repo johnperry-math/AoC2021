@@ -16,6 +16,8 @@ procedure Day25 is
 
    Doing_Example : constant Boolean := False;
 
+   Visualizing : constant Boolean := True;
+
    -- SECTION
    -- global types and variables
 
@@ -86,10 +88,68 @@ procedure Day25 is
 
    end Put_Map;
 
+   procedure Write_To_Ppm ( Map : Map_Array; Step : Natural; Substep : Natural )
+   is
+
+      Output_File : Text_IO.File_Type;
+
+      Scale       : constant Positive := 1;
+
+      subtype Rows is Integer range 1 .. Scale * Num_Rows;
+      subtype Cols is Integer range 1 .. Scale * Num_Cols;
+
+      Width       : constant Positive := Cols'Last - Cols'First + 1;
+      Height      : constant Positive := Rows'Last - Rows'First + 1;
+
+      Step_String : String := Step'Image;
+      Substep_String : String := Substep'Image;
+      Suffix_String : String := ( if Step < 1 then "000"
+                         elsif Step < 10 then "00"
+                         elsif Step < 100 then "0"
+                         else ""
+                       ) & Step_String ( 2 .. Step_String'Last );
+
+   begin
+
+      Text_IO.Create (Output_File,
+                      Name => "iteration_"
+                      & Suffix_String
+                      & "_" & Substep_String ( 2 .. Substep_String'Last )
+                      & ".ppm" );
+      Text_IO.Put (Output_File, "P3");
+      Text_IO.Put (Output_File, Width'Image);
+      Text_IO.Put (Output_File, Height'Image);
+      Text_IO.Put (Output_File, " 255"); -- max color
+      Text_IO.New_Line (Output_File);
+
+      for Row in 1 .. Num_Rows loop
+         for Row_Repeat in 1 .. Scale loop
+            for Col in 1 .. Num_Cols loop
+
+               for Col_Repeat in 1 .. Scale loop
+                  case Map ( Row, Col ) is
+                  when Empty => Text_IO.Put_Line ( Output_File, "194 178 128" );
+                  when Right => Text_IO.Put_Line ( Output_File, "224 64 64" );
+                  when Down => Text_IO.Put_Line ( Output_File, "64 64 224" );
+                  end case;
+               end loop;
+
+            end loop;
+            Text_IO.New_Line ( Output_File );
+         end loop;
+         Text_IO.New_Line ( Output_File );
+      end loop;
+
+      Text_IO.Close (Output_File);
+
+   end Write_To_Ppm;
+
+
+
    -- SECTION
    -- Part 1
 
-   procedure Iterate ( Changed : out Boolean ) is
+   procedure Iterate ( Changed : out Boolean; Step : Positive ) is
    -- move the cucumbers per puzzle rules
       Tmp : Map_Array := ( others => ( others => Empty ) );
       Next_Row, Next_Col : Positive;
@@ -123,6 +183,9 @@ procedure Day25 is
       end loop;
 
       -- update map and reset tmp
+      if Visualizing then
+         Write_To_Ppm ( Tmp, Step, 1 );
+      end if;
       Map := Tmp;
       Tmp := ( others => ( others => Empty ) );
 
@@ -151,6 +214,9 @@ procedure Day25 is
          end loop;
       end loop;
 
+      if Visualizing then
+         Write_To_Ppm ( Tmp, Step, 2 );
+      end if;
       Map := Tmp;
 
    end Iterate;
@@ -162,9 +228,13 @@ begin
 
    Read_Input;
 
+   if Visualizing then
+      Write_To_Ppm ( Map, 0, 1 );
+   end if;
+
    while Map_Changed loop
-      Iterate ( Map_Changed );
       Iteration := Iteration + 1;
+      Iterate ( Map_Changed, Iteration );
    end loop;
 
    Text_IO.Put_Line ( "there were" & Iteration'Image & " iterations");
